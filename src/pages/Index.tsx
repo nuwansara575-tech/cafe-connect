@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Coffee, QrCode, Shield, BarChart3, ArrowRight, Sparkles } from "lucide-react";
+import { QrCode, Shield, BarChart3, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
@@ -8,13 +8,25 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Large warm glow top-right */}
-        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-primary/8 blur-[120px]" />
-        {/* Subtle glow bottom-left */}
-        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-primary/5 blur-[100px]" />
+        {/* Animated blobs */}
+        <motion.div
+          animate={{ x: [0, 30, -20, 0], y: [0, -20, 15, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-32 -right-32 w-[550px] h-[550px] rounded-full bg-primary/10 blur-[100px]"
+        />
+        <motion.div
+          animate={{ x: [0, -25, 20, 0], y: [0, 25, -15, 0] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -bottom-32 -left-32 w-[450px] h-[450px] rounded-full bg-primary/6 blur-[90px]"
+        />
+        <motion.div
+          animate={{ x: [0, 15, -10, 0], y: [0, -30, 10, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[350px] h-[350px] rounded-full bg-primary/4 blur-[80px]"
+        />
         {/* Grid pattern */}
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.025]"
           style={{
             backgroundImage: `radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)`,
             backgroundSize: "32px 32px",
@@ -22,15 +34,15 @@ const Index = () => {
         />
       </div>
 
-      {/* Header */}
-      <header className="relative w-full px-6 md:px-12 py-5 flex items-center justify-between">
+      {/* Header - Glass */}
+      <header className="glass-subtle sticky top-0 z-50 w-full px-6 md:px-12 py-4 flex items-center justify-between">
         <img
           alt="Cafe Connect"
           className="h-14 object-contain"
           src="/lovable-uploads/0408a127-79d5-40ae-b9e5-d86af37c1714.png"
         />
         <Link to="/login">
-          <Button variant="outline" size="sm" className="rounded-full px-5">
+          <Button variant="outline" size="sm" className="rounded-full px-5 glass border-border/50 hover:bg-card/60">
             Admin Login
           </Button>
         </Link>
@@ -44,12 +56,12 @@ const Index = () => {
           transition={{ duration: 0.7 }}
           className="max-w-3xl text-center"
         >
-          {/* Badge */}
+          {/* Badge - Glass */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 mb-8"
+            className="glass-subtle inline-flex items-center gap-2 rounded-full px-5 py-2 mb-8"
           >
             <Sparkles className="w-3.5 h-3.5 text-primary" />
             <span className="text-xs font-medium text-primary">Smart QR Coupon Platform</span>
@@ -80,7 +92,7 @@ const Index = () => {
           </div>
         </motion.div>
 
-        {/* Features */}
+        {/* Features - Glass Cards */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -109,7 +121,7 @@ const Index = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 + i * 0.1 }}
-              className="group rounded-2xl border border-border bg-card/80 backdrop-blur-sm p-6 text-left hover:shadow-cafe hover:border-primary/20 transition-all duration-300"
+              className="group glass-strong rounded-2xl p-6 text-left hover:shadow-cafe hover:border-primary/30 transition-all duration-300"
             >
               <div className="w-11 h-11 rounded-xl gradient-cafe flex items-center justify-center mb-4 group-hover:shadow-cafe transition-shadow duration-300">
                 <f.icon className="w-5 h-5 text-primary-foreground" />
