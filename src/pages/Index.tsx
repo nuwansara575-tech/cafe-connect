@@ -42,7 +42,7 @@ const Index = () => {
           src="/lovable-uploads/0408a127-79d5-40ae-b9e5-d86af37c1714.png"
         />
         <Link to="/login">
-          <Button variant="outline" size="sm" className="rounded-full px-5 glass border-border/50 hover:bg-card/60">
+          <Button variant="outline" size="sm" className="rounded-full px-5 bg-card/50 backdrop-blur-sm border-border/60 hover:bg-card/70 active:bg-card/80">
             Admin Login
           </Button>
         </Link>
