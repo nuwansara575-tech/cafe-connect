@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, XCircle, Clock, Coffee, Gift, Copy, Check, Phone, User } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Coffee, Gift, Copy, Check, Phone, User, Mail, Cake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,8 @@ const Redeem = () => {
   const [data, setData] = useState<CouponData>({});
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [birthday, setBirthday] = useState("");
   const [copied, setCopied] = useState(false);
   const [claimError, setClaimError] = useState("");
   const submitting = useRef(false);
@@ -42,7 +44,6 @@ const Redeem = () => {
       });
       if (error || !result) { setState("invalid"); return; }
       setData(result);
-      // Map status to UI state
       if (result.status === "unused" || result.status === "scanned") {
         setState("scanned");
       } else {
@@ -53,10 +54,23 @@ const Redeem = () => {
     }
   };
 
+  const validatePhone = (value: string) => {
+    const cleaned = value.replace(/[\s\-()]/g, "");
+    return cleaned.length >= 9 && /^\+?\d{9,15}$/.test(cleaned);
+  };
+
   const handleClaim = async () => {
     if (submitting.current || !token) return;
-    if (!phone.trim() || phone.trim().length < 7) {
-      setClaimError("Please enter a valid phone number");
+    if (!name.trim()) {
+      setClaimError("Please enter your name");
+      return;
+    }
+    if (!validatePhone(phone)) {
+      setClaimError("Please enter a valid mobile number (e.g. +94 77 123 4567)");
+      return;
+    }
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setClaimError("Please enter a valid email address");
       return;
     }
     setClaimError("");
@@ -64,7 +78,13 @@ const Redeem = () => {
     setState("claiming");
     try {
       const { data: result, error } = await supabase.functions.invoke("coupons/claim", {
-        body: { token, phone: phone.trim(), name: name.trim() || undefined },
+        body: {
+          token,
+          phone: phone.trim(),
+          name: name.trim(),
+          email: email.trim() || undefined,
+          birthday: birthday || undefined,
+        },
       });
       if (error || !result?.success) {
         setClaimError(result?.error || "Failed to claim coupon");
@@ -112,42 +132,52 @@ const Redeem = () => {
               <p className="text-primary-foreground/80 text-sm font-medium">{data.campaign_name}</p>
             </div>
             <div className="p-6">
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 rounded-full gradient-cafe flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
-                  <Gift className="w-8 h-8 text-primary-foreground" />
+              <div className="text-center mb-5">
+                <div className="w-14 h-14 rounded-full gradient-cafe flex items-center justify-center mx-auto mb-3 animate-pulse-glow">
+                  <Gift className="w-7 h-7 text-primary-foreground" />
                 </div>
-                <h2 className="text-3xl font-display font-bold text-foreground mb-2">
+                <h2 className="text-2xl font-display font-bold text-foreground mb-1">
                   {data.discount_value?.includes("%") ? `${data.discount_value} OFF` : data.discount_value}
                 </h2>
-                <p className="text-lg font-semibold text-foreground mb-1">{data.offer_title}</p>
-                <p className="text-sm text-muted-foreground">{data.offer_description}</p>
+                <p className="text-base font-semibold text-foreground mb-0.5">{data.offer_title}</p>
+                <p className="text-xs text-muted-foreground">{data.offer_description}</p>
               </div>
 
-              <div className="space-y-3 mb-4">
+              <div className="space-y-3 mb-3">
+                <div>
+                  <Label htmlFor="name" className="text-sm font-medium flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5" /> Your Name <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="name" type="text" placeholder="e.g. John Doe"
+                    value={name} onChange={(e) => setName(e.target.value)} className="mt-1"
+                  />
+                </div>
                 <div>
                   <Label htmlFor="phone" className="text-sm font-medium flex items-center gap-1.5">
                     <Phone className="w-3.5 h-3.5" /> Mobile Number <span className="text-destructive">*</span>
                   </Label>
                   <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="e.g. +94 77 123 4567"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="mt-1"
+                    id="phone" type="tel" placeholder="e.g. +94 77 123 4567"
+                    value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="name" className="text-sm font-medium flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5" /> Your Name <span className="text-muted-foreground text-xs">(optional)</span>
+                  <Label htmlFor="email" className="text-sm font-medium flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5" /> Email <span className="text-muted-foreground text-xs">(optional)</span>
                   </Label>
                   <Input
-                    id="name"
-                    type="text"
-                    placeholder="e.g. John"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="mt-1"
+                    id="email" type="email" placeholder="e.g. john@example.com"
+                    value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="birthday" className="text-sm font-medium flex items-center gap-1.5">
+                    <Cake className="w-3.5 h-3.5" /> Birthday <span className="text-muted-foreground text-xs">(optional)</span>
+                  </Label>
+                  <Input
+                    id="birthday" type="date"
+                    value={birthday} onChange={(e) => setBirthday(e.target.value)} className="mt-1"
                   />
                 </div>
               </div>
@@ -162,8 +192,8 @@ const Redeem = () => {
                 <Coffee className="w-5 h-5 mr-2" />
                 Claim Coupon
               </Button>
-              <p className="text-xs text-muted-foreground mt-3 text-center">
-                Your coupon code will be sent to your phone
+              <p className="text-[10px] text-muted-foreground mt-3 text-center leading-tight">
+                By claiming this coupon you agree to receive promotional messages from Cafe Connect.
               </p>
             </div>
           </motion.div>
