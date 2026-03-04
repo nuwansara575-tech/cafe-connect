@@ -53,6 +53,7 @@ export default function Login() {
           </form>
         </CardContent>
       </Card>
+      <p className="text-xs text-muted-foreground mt-8">Powered by ZIP Solutions</p>
     </div>
   );
 }
