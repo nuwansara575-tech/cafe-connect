@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { QRCodeSVG } from "qrcode.react";
 import { toPng } from "html-to-image";
@@ -21,7 +21,11 @@ interface Coupon {
   status: string;
   coupon_code: string;
   created_at: string;
+  scanned_at: string | null;
+  claimed_at: string | null;
   redeemed_at: string | null;
+  customer_phone: string | null;
+  customer_name: string | null;
   campaign_id: string | null;
 }
 
@@ -37,7 +41,7 @@ export default function Coupons() {
     let query = supabase.from("coupons").select("*").order("created_at", { ascending: false }).limit(500);
     if (statusFilter !== "all") query = query.eq("status", statusFilter);
     if (search.trim()) {
-      query = query.or(`token.ilike.%${search}%,coupon_code.ilike.%${search}%`);
+      query = query.or(`token.ilike.%${search}%,coupon_code.ilike.%${search}%,customer_phone.ilike.%${search}%`);
     }
     const { data } = await query;
     setCoupons((data as Coupon[]) || []);
@@ -90,6 +94,8 @@ export default function Coupons() {
   const statusBadge = (status: string) => {
     switch (status) {
       case "unused": return <Badge className="bg-success/10 text-success border-success/20">Unused</Badge>;
+      case "scanned": return <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20">Scanned</Badge>;
+      case "claimed": return <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20">Claimed</Badge>;
       case "redeemed": return <Badge className="bg-primary/10 text-primary border-primary/20">Redeemed</Badge>;
       case "expired": return <Badge variant="secondary">Expired</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
@@ -104,7 +110,7 @@ export default function Coupons() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search by token or coupon code..."
+            placeholder="Search by token, code, or phone..."
             className="pl-9"
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -115,6 +121,8 @@ export default function Coupons() {
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="unused">Unused</SelectItem>
+            <SelectItem value="scanned">Scanned</SelectItem>
+            <SelectItem value="claimed">Claimed</SelectItem>
             <SelectItem value="redeemed">Redeemed</SelectItem>
             <SelectItem value="expired">Expired</SelectItem>
           </SelectContent>
@@ -137,8 +145,10 @@ export default function Coupons() {
                 <TableHead>Code</TableHead>
                 <TableHead>Token</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Customer</TableHead>
                 <TableHead>Discount</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead>Scan</TableHead>
+                <TableHead>Claimed</TableHead>
                 <TableHead>Redeemed</TableHead>
                 <TableHead className="w-32"></TableHead>
               </TableRow>
@@ -147,14 +157,27 @@ export default function Coupons() {
               {coupons.map(c => (
                 <TableRow key={c.id}>
                   <TableCell className="font-mono text-sm font-medium">{c.coupon_code}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground font-mono max-w-[120px] truncate">{c.token}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground font-mono max-w-[100px] truncate">{c.token}</TableCell>
                   <TableCell>{statusBadge(c.status)}</TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {c.customer_phone ? (
+                        <>
+                          <p className="font-medium">{c.customer_phone}</p>
+                          {c.customer_name && <p className="text-xs text-muted-foreground">{c.customer_name}</p>}
+                        </>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell>{c.discount_value}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{c.redeemed_at ? new Date(c.redeemed_at).toLocaleDateString() : "—"}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{c.scanned_at ? new Date(c.scanned_at).toLocaleString() : "—"}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{c.claimed_at ? new Date(c.claimed_at).toLocaleString() : "—"}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{c.redeemed_at ? new Date(c.redeemed_at).toLocaleString() : "—"}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      {c.status === "unused" && (
+                      {["unused", "scanned"].includes(c.status) && (
                         <>
                           <Button variant="ghost" size="icon" onClick={() => downloadQR(c)} title="Download QR"><Download className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => handleExpire(c.id)} title="Expire"><XCircle className="w-4 h-4 text-muted-foreground" /></Button>

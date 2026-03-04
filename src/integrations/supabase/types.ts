@@ -51,42 +51,54 @@ export type Database = {
         Row: {
           campaign_id: string | null
           campaign_name: string
+          claimed_at: string | null
           coupon_code: string
           created_at: string
+          customer_name: string | null
+          customer_phone: string | null
           discount_value: string
           expires_at: string | null
           id: string
           offer_description: string
           offer_title: string
           redeemed_at: string | null
+          scanned_at: string | null
           status: string
           token: string
         }
         Insert: {
           campaign_id?: string | null
           campaign_name?: string
+          claimed_at?: string | null
           coupon_code: string
           created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
           discount_value?: string
           expires_at?: string | null
           id?: string
           offer_description?: string
           offer_title?: string
           redeemed_at?: string | null
+          scanned_at?: string | null
           status?: string
           token?: string
         }
         Update: {
           campaign_id?: string | null
           campaign_name?: string
+          claimed_at?: string | null
           coupon_code?: string
           created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
           discount_value?: string
           expires_at?: string | null
           id?: string
           offer_description?: string
           offer_title?: string
           redeemed_at?: string | null
+          scanned_at?: string | null
           status?: string
           token?: string
         }

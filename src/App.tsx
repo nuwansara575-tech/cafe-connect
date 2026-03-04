@@ -17,6 +17,7 @@ const Campaigns = lazy(() => import("./pages/admin/Campaigns"));
 const Coupons = lazy(() => import("./pages/admin/Coupons"));
 const GenerateQR = lazy(() => import("./pages/admin/GenerateQR"));
 const Analytics = lazy(() => import("./pages/admin/Analytics"));
+const RedeemCoupon = lazy(() => import("./pages/admin/RedeemCoupon"));
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
                 <Route path="campaigns" element={<Campaigns />} />
                 <Route path="coupons" element={<Coupons />} />
                 <Route path="generate" element={<GenerateQR />} />
+                <Route path="redeem" element={<RedeemCoupon />} />
                 <Route path="analytics" element={<Analytics />} />
               </Route>
               <Route path="*" element={<NotFound />} />

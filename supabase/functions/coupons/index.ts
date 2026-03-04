@@ -6,29 +6,23 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Helper to verify admin role
+function jsonResponse(body: object, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 async function requireAdmin(req: Request, supabase: any): Promise<Response | null> {
   const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
+  if (!authHeader?.startsWith("Bearer ")) return jsonResponse({ error: "Unauthorized" }, 401);
   const token = authHeader.replace("Bearer ", "");
   const { data, error } = await supabase.auth.getUser(token);
-  if (error || !data?.user) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
+  if (error || !data?.user) return jsonResponse({ error: "Unauthorized" }, 401);
   const { data: roleRow } = await supabase
     .from("user_roles").select("role").eq("user_id", data.user.id).eq("role", "admin").maybeSingle();
-  if (!roleRow) {
-    return new Response(JSON.stringify({ error: "Forbidden" }), {
-      status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-  return null; // authorized
+  if (!roleRow) return jsonResponse({ error: "Forbidden" }, 403);
+  return null;
 }
 
 serve(async (req) => {
@@ -43,75 +37,14 @@ serve(async (req) => {
 
   const url = new URL(req.url);
   const action = url.pathname.split("/").pop();
-
-  // Extract device/IP for scan tracking
   const device = req.headers.get("user-agent") || "unknown";
   const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("cf-connecting-ip") || "unknown";
 
   try {
-    // REDEEM
-    if (req.method === "POST" && action === "redeem") {
-      const { token } = await req.json();
-      if (!token) {
-        return new Response(JSON.stringify({ error: "Token required" }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      const { data, error } = await supabase
-        .from("coupons")
-        .update({ status: "redeemed", redeemed_at: new Date().toISOString() })
-        .eq("token", token)
-        .eq("status", "unused")
-        .select()
-        .maybeSingle();
-
-      if (error) {
-        return new Response(JSON.stringify({ error: "Server error" }), {
-          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      if (!data) {
-        const { data: existing } = await supabase
-          .from("coupons").select("status, id").eq("token", token).maybeSingle();
-
-        // Record failed scan
-        await supabase.from("scans").insert({
-          token, device, ip_address: ipAddress, success: false,
-          coupon_id: existing?.id || null,
-        });
-
-        if (!existing) {
-          return new Response(JSON.stringify({ error: "Invalid token", status: "invalid" }), {
-            status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-        return new Response(
-          JSON.stringify({ error: "Already redeemed", status: existing.status }),
-          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      // Record successful scan
-      await supabase.from("scans").insert({
-        token, device, ip_address: ipAddress, success: true, coupon_id: data.id,
-      });
-
-      return new Response(
-        JSON.stringify({ success: true, coupon_code: data.coupon_code, status: "redeemed" }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // VALIDATE
+    // VALIDATE — called when QR is scanned, marks coupon as "scanned"
     if (req.method === "POST" && action === "validate") {
       const { token } = await req.json();
-      if (!token) {
-        return new Response(JSON.stringify({ error: "Token required" }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      if (!token) return jsonResponse({ error: "Token required" }, 400);
 
       const { data, error } = await supabase
         .from("coupons").select("*").eq("token", token).maybeSingle();
@@ -119,39 +52,150 @@ serve(async (req) => {
       // Record scan
       await supabase.from("scans").insert({
         token, device, ip_address: ipAddress,
-        success: !!(data && data.status === "unused"),
+        success: !!(data && ["unused", "scanned"].includes(data.status)),
         coupon_id: data?.id || null,
       });
 
-      if (error || !data) {
-        return new Response(JSON.stringify({ error: "Invalid token", status: "invalid" }), {
-          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      if (error || !data) return jsonResponse({ error: "Invalid token", status: "invalid" }, 404);
 
+      // Check expiry
       if (data.expires_at && new Date(data.expires_at) < new Date()) {
-        if (data.status === "unused") {
+        if (["unused", "scanned"].includes(data.status)) {
           await supabase.from("coupons").update({ status: "expired" }).eq("id", data.id);
         }
-        return new Response(
-          JSON.stringify({ status: "expired", offer_title: data.offer_title }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return jsonResponse({ status: "expired", offer_title: data.offer_title });
       }
 
-      return new Response(JSON.stringify({
-        status: data.status,
+      // If unused, mark as scanned
+      if (data.status === "unused") {
+        await supabase.from("coupons")
+          .update({ status: "scanned", scanned_at: new Date().toISOString() })
+          .eq("id", data.id);
+      }
+
+      return jsonResponse({
+        status: data.status === "unused" ? "scanned" : data.status,
         offer_title: data.offer_title,
         offer_description: data.offer_description,
         discount_value: data.discount_value,
         campaign_name: data.campaign_name,
-        coupon_code: data.status === "redeemed" ? data.coupon_code : undefined,
-      }), {
-        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // GENERATE (admin only)
+    // CLAIM — customer submits phone number to claim coupon
+    if (req.method === "POST" && action === "claim") {
+      const { token, phone, name } = await req.json();
+      if (!token) return jsonResponse({ error: "Token required" }, 400);
+      if (!phone || typeof phone !== "string" || phone.trim().length < 7) {
+        return jsonResponse({ error: "Valid phone number required" }, 400);
+      }
+
+      // Get coupon
+      const { data: coupon, error } = await supabase
+        .from("coupons").select("*").eq("token", token).maybeSingle();
+
+      if (error || !coupon) return jsonResponse({ error: "Invalid token", status: "invalid" }, 404);
+
+      // Only scanned or unused coupons can be claimed
+      if (!["unused", "scanned"].includes(coupon.status)) {
+        return jsonResponse({
+          error: coupon.status === "claimed" ? "Already claimed" : coupon.status === "redeemed" ? "Already redeemed" : "Coupon expired",
+          status: coupon.status,
+        }, 409);
+      }
+
+      // Check expiry
+      if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+        await supabase.from("coupons").update({ status: "expired" }).eq("id", coupon.id);
+        return jsonResponse({ error: "Coupon expired", status: "expired" }, 409);
+      }
+
+      // Check duplicate phone for same coupon
+      if (coupon.customer_phone && coupon.customer_phone === phone.trim()) {
+        return jsonResponse({ error: "Already claimed with this phone", status: "claimed" }, 409);
+      }
+
+      // Update coupon to claimed
+      const { data: updated, error: updateErr } = await supabase
+        .from("coupons")
+        .update({
+          status: "claimed",
+          claimed_at: new Date().toISOString(),
+          scanned_at: coupon.scanned_at || new Date().toISOString(),
+          customer_phone: phone.trim(),
+          customer_name: name?.trim() || null,
+        })
+        .eq("id", coupon.id)
+        .in("status", ["unused", "scanned"])
+        .select()
+        .maybeSingle();
+
+      if (updateErr || !updated) {
+        return jsonResponse({ error: "Failed to claim coupon" }, 500);
+      }
+
+      return jsonResponse({
+        success: true,
+        status: "claimed",
+        coupon_code: updated.coupon_code,
+        offer_title: updated.offer_title,
+        discount_value: updated.discount_value,
+      });
+    }
+
+    // REDEEM — admin/cashier manually redeems a coupon by code (requires auth)
+    if (req.method === "POST" && action === "redeem") {
+      const denied = await requireAdmin(req, supabase);
+      if (denied) return denied;
+
+      const { coupon_code } = await req.json();
+      if (!coupon_code) return jsonResponse({ error: "Coupon code required" }, 400);
+
+      // Look up coupon by code
+      const { data: coupon, error } = await supabase
+        .from("coupons").select("*").eq("coupon_code", coupon_code.trim().toUpperCase()).maybeSingle();
+
+      if (error || !coupon) return jsonResponse({ error: "Coupon not found", status: "invalid" }, 404);
+
+      if (coupon.status === "redeemed") {
+        return jsonResponse({ error: "Already redeemed", status: "redeemed", redeemed_at: coupon.redeemed_at }, 409);
+      }
+      if (coupon.status === "expired") {
+        return jsonResponse({ error: "Coupon expired", status: "expired" }, 409);
+      }
+      if (coupon.status !== "claimed") {
+        return jsonResponse({ error: "Coupon must be claimed by customer first", status: coupon.status }, 409);
+      }
+
+      // Check expiry
+      if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+        await supabase.from("coupons").update({ status: "expired" }).eq("id", coupon.id);
+        return jsonResponse({ error: "Coupon expired", status: "expired" }, 409);
+      }
+
+      // Redeem
+      const { data: redeemed, error: redeemErr } = await supabase
+        .from("coupons")
+        .update({ status: "redeemed", redeemed_at: new Date().toISOString() })
+        .eq("id", coupon.id)
+        .eq("status", "claimed")
+        .select()
+        .maybeSingle();
+
+      if (redeemErr || !redeemed) return jsonResponse({ error: "Failed to redeem" }, 500);
+
+      return jsonResponse({
+        success: true,
+        status: "redeemed",
+        coupon_code: redeemed.coupon_code,
+        customer_phone: redeemed.customer_phone,
+        customer_name: redeemed.customer_name,
+        discount_value: redeemed.discount_value,
+        offer_title: redeemed.offer_title,
+      });
+    }
+
+    // GENERATE — admin only
     if (req.method === "POST" && action === "generate") {
       const denied = await requireAdmin(req, supabase);
       if (denied) return denied;
@@ -174,42 +218,33 @@ serve(async (req) => {
       }
 
       const { data, error } = await supabase.from("coupons").insert(coupons).select();
+      if (error) return jsonResponse({ error: error.message }, 500);
 
-      if (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      return new Response(JSON.stringify({ success: true, count: data.length, coupons: data }), {
-        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ success: true, count: data.length, coupons: data });
     }
 
-    // STATS (admin only)
+    // STATS — admin only
     if ((req.method === "GET" || req.method === "POST") && action === "stats") {
       const denied = await requireAdmin(req, supabase);
       if (denied) return denied;
+
       const { data: all } = await supabase.from("coupons").select("status");
       const total = all?.length || 0;
       const redeemed = all?.filter((c) => c.status === "redeemed").length || 0;
+      const claimed = all?.filter((c) => c.status === "claimed").length || 0;
+      const scanned = all?.filter((c) => c.status === "scanned").length || 0;
       const unused = all?.filter((c) => c.status === "unused").length || 0;
       const expired = all?.filter((c) => c.status === "expired").length || 0;
 
-      return new Response(JSON.stringify({
-        total, redeemed, unused, expired,
+      return jsonResponse({
+        total, redeemed, claimed, scanned, unused, expired,
         conversion_rate: total > 0 ? ((redeemed / total) * 100).toFixed(1) : "0",
-      }), {
-        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        claim_rate: total > 0 ? ((claimed / total) * 100).toFixed(1) : "0",
       });
     }
 
-    return new Response(JSON.stringify({ error: "Not found" }), {
-      status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: "Not found" }, 404);
   } catch (err) {
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: "Internal server error" }, 500);
   }
 });
