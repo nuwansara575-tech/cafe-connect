@@ -102,7 +102,7 @@ export default function RedeemCoupon() {
               <ShieldCheck className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h2 className="font-semibold text-foreground">Cashier Verification</h2>
+              <h2 className="font-semibold text-foreground">Verification</h2>
               <p className="text-xs text-muted-foreground">Look up a coupon code to verify its status</p>
             </div>
           </div>
