@@ -19,13 +19,21 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signIn(email, password);
-    setLoading(false);
-    if (error) {
-      toast.error("Invalid credentials");
-      return;
+    try {
+      const timeoutPromise = new Promise<{ error: Error }>((resolve) =>
+        setTimeout(() => resolve({ error: new Error("Request timed out") }), 10000)
+      );
+      const result = await Promise.race([signIn(email, password), timeoutPromise]);
+      setLoading(false);
+      if (result.error) {
+        toast.error(result.error.message === "Request timed out" ? "Connection timed out. Please try again." : "Invalid credentials");
+        return;
+      }
+      navigate("/admin");
+    } catch (err) {
+      setLoading(false);
+      toast.error("Something went wrong. Please try again.");
     }
-    navigate("/admin");
   };
 
   return (
