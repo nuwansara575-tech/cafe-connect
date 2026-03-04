@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Package, CheckCircle, Clock, BarChart3, ScanLine } from "lucide-react";
+import { Loader2, Package, CheckCircle, Clock, BarChart3, ScanLine, HandCoins, UserCheck } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 interface Stats {
   total: number;
   redeemed: number;
+  claimed: number;
+  scanned: number;
   unused: number;
   expired: number;
   conversion_rate: string;
+  claim_rate: string;
   totalScans: number;
 }
 
@@ -24,13 +27,13 @@ export default function Dashboard() {
       const { data: coupons } = await supabase.from("coupons").select("status");
       const total = coupons?.length || 0;
       const redeemed = coupons?.filter(c => c.status === "redeemed").length || 0;
+      const claimed = coupons?.filter(c => c.status === "claimed").length || 0;
+      const scanned = coupons?.filter(c => c.status === "scanned").length || 0;
       const unused = coupons?.filter(c => c.status === "unused").length || 0;
       const expired = coupons?.filter(c => c.status === "expired").length || 0;
 
-      // Fetch scan count
       const { count: scanCount } = await supabase.from("scans").select("*", { count: "exact", head: true });
 
-      // Fetch daily scans (last 14 days)
       const since = new Date();
       since.setDate(since.getDate() - 14);
       const { data: scans } = await supabase
@@ -47,11 +50,9 @@ export default function Dashboard() {
       setDailyScans(Object.entries(dayMap).map(([date, count]) => ({ date, count })));
 
       setStats({
-        total,
-        redeemed,
-        unused,
-        expired,
+        total, redeemed, claimed, scanned, unused, expired,
         conversion_rate: total > 0 ? ((redeemed / total) * 100).toFixed(1) : "0",
+        claim_rate: total > 0 ? (((claimed + redeemed) / total) * 100).toFixed(1) : "0",
         totalScans: scanCount || 0,
       });
       setLoading(false);
@@ -66,9 +67,11 @@ export default function Dashboard() {
   const cards = [
     { label: "Total Coupons", value: stats!.total, icon: Package, color: "text-foreground" },
     { label: "Unused", value: stats!.unused, icon: Clock, color: "text-success" },
+    { label: "Claimed", value: stats!.claimed, icon: UserCheck, color: "text-blue-500" },
     { label: "Redeemed", value: stats!.redeemed, icon: CheckCircle, color: "text-primary" },
     { label: "Total Scans", value: stats!.totalScans, icon: ScanLine, color: "text-foreground" },
-    { label: "Conversion Rate", value: `${stats!.conversion_rate}%`, icon: BarChart3, color: "text-primary" },
+    { label: "Claim Rate", value: `${stats!.claim_rate}%`, icon: HandCoins, color: "text-blue-500" },
+    { label: "Redeem Rate", value: `${stats!.conversion_rate}%`, icon: BarChart3, color: "text-primary" },
   ];
 
   return (
