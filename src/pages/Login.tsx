@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Coffee } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import cafeConnectLogo from "@/assets/cafe-connect-logo.png";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -31,9 +32,7 @@ export default function Login() {
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <div className="w-12 h-12 rounded-xl gradient-cafe flex items-center justify-center mx-auto mb-3">
-            <Coffee className="w-6 h-6 text-primary-foreground" />
-          </div>
+          <img src={cafeConnectLogo} alt="Cafe Connect Logo" className="h-24 object-contain mx-auto mb-3" />
           <CardTitle className="text-2xl">Cafe Connect</CardTitle>
           <CardDescription>Sign in to the admin dashboard</CardDescription>
         </CardHeader>
