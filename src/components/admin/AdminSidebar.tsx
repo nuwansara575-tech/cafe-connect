@@ -2,7 +2,7 @@ import {
   LayoutDashboard, Megaphone, Ticket, BarChart3, QrCode, ShieldCheck } from
 "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -34,7 +34,7 @@ export function AdminSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
-        {!collapsed && <img alt="Cafe Connect" className="h-16 object-contain" src="/lovable-uploads/afe08f13-99df-4712-b30b-39694af91039.png" />}
+        {!collapsed && <Link to="/"><img alt="Cafe Connect" className="h-16 object-contain cursor-pointer" src="/lovable-uploads/afe08f13-99df-4712-b30b-39694af91039.png" /></Link>}
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
