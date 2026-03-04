@@ -29,7 +29,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <img src={cafeConnectLogo} alt="Cafe Connect Logo" className="h-24 object-contain mx-auto mb-3" />
@@ -53,7 +53,9 @@ export default function Login() {
           </form>
         </CardContent>
       </Card>
-      <p className="text-xs text-muted-foreground mt-8">Powered by ZIP Solutions</p>
+      <div className="absolute bottom-6 left-0 right-0 text-center">
+        <p className="text-xs text-muted-foreground">Powered by ZIP Solutions</p>
+      </div>
     </div>
   );
 }
