@@ -21,12 +21,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchRole = async (userId: string) => {
     try {
-      const { data } = await supabase
+      const rolePromise = supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", userId)
         .maybeSingle();
-      setRole(data?.role ?? null);
+      const timeoutPromise = new Promise<null>((resolve) =>
+        setTimeout(() => resolve(null), 3000)
+      );
+      const result = await Promise.race([rolePromise, timeoutPromise]);
+      if (result && 'data' in result) {
+        setRole(result.data?.role ?? null);
+      } else {
+        console.warn("Role fetch timed out");
+        setRole(null);
+      }
     } catch (err) {
       console.error("Failed to fetch role:", err);
       setRole(null);
