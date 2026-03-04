@@ -20,12 +20,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<string | null>(null);
 
   const fetchRole = async (userId: string) => {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .maybeSingle();
-    setRole(data?.role ?? null);
+    try {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .maybeSingle();
+      setRole(data?.role ?? null);
+    } catch (err) {
+      console.error("Failed to fetch role:", err);
+      setRole(null);
+    }
   };
 
   useEffect(() => {
@@ -47,9 +52,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await fetchRole(session.user.id);
       }
       setLoading(false);
+    }).catch((err) => {
+      console.error("Failed to get session:", err);
+      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // Safety timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      setLoading((prev) => {
+        if (prev) console.warn("Auth loading timed out");
+        return false;
+      });
+    }, 5000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
