@@ -6,6 +6,31 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Helper to verify admin role
+async function requireAdmin(req: Request, supabase: any): Promise<Response | null> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const token = authHeader.replace("Bearer ", "");
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const { data: roleRow } = await supabase
+    .from("user_roles").select("role").eq("user_id", data.user.id).eq("role", "admin").maybeSingle();
+  if (!roleRow) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  return null; // authorized
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -126,8 +151,11 @@ serve(async (req) => {
       });
     }
 
-    // GENERATE
+    // GENERATE (admin only)
     if (req.method === "POST" && action === "generate") {
+      const denied = await requireAdmin(req, supabase);
+      if (denied) return denied;
+
       const { count = 10, campaign_name, offer_title, offer_description, discount_value, expires_at, campaign_id } = await req.json();
 
       const coupons = [];
@@ -158,8 +186,10 @@ serve(async (req) => {
       });
     }
 
-    // STATS
+    // STATS (admin only)
     if ((req.method === "GET" || req.method === "POST") && action === "stats") {
+      const denied = await requireAdmin(req, supabase);
+      if (denied) return denied;
       const { data: all } = await supabase.from("coupons").select("status");
       const total = all?.length || 0;
       const redeemed = all?.filter((c) => c.status === "redeemed").length || 0;
