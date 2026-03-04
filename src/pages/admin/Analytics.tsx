@@ -135,7 +135,11 @@ export default function Analytics() {
                     outerRadius={90}
                     paddingAngle={3}
                     dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, percent, x, y, textAnchor }) => (
+                      <text x={x} y={y} textAnchor={textAnchor} fill="hsl(var(--foreground))" fontSize={10} fontWeight={500}>
+                        {`${name} ${(percent * 100).toFixed(0)}%`}
+                      </text>
+                    )}
                     labelLine={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1 }}
                   >
                     {statusData.map((entry, i) => (
