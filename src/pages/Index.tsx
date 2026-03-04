@@ -10,8 +10,8 @@ const Index = () => {
       {/* Header */}
       <header className="w-full px-6 py-4 flex items-center justify-between border-b border-border">
         <img alt="Cafe Connect" className="h-16 object-contain" src="/lovable-uploads/0408a127-79d5-40ae-b9e5-d86af37c1714.png" />
-        <Link to="/admin">
-          <Button variant="outline" size="sm">Admin Panel</Button>
+        <Link to="/login">
+          <Button variant="outline" size="sm">Admin Login</Button>
         </Link>
       </header>
 

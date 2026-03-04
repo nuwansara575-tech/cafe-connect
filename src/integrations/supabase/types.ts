@@ -14,8 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      campaigns: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          name: string
+          offer: string
+          start_date: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name: string
+          offer: string
+          start_date?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          offer?: string
+          start_date?: string
+          status?: string
+        }
+        Relationships: []
+      }
       coupons: {
         Row: {
+          campaign_id: string | null
           campaign_name: string
           coupon_code: string
           created_at: string
@@ -29,6 +63,7 @@ export type Database = {
           token: string
         }
         Insert: {
+          campaign_id?: string | null
           campaign_name?: string
           coupon_code: string
           created_at?: string
@@ -42,6 +77,7 @@ export type Database = {
           token?: string
         }
         Update: {
+          campaign_id?: string | null
           campaign_name?: string
           coupon_code?: string
           created_at?: string
@@ -54,6 +90,70 @@ export type Database = {
           status?: string
           token?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "coupons_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scans: {
+        Row: {
+          coupon_id: string | null
+          device: string | null
+          id: string
+          ip_address: string | null
+          scan_time: string
+          success: boolean
+          token: string
+        }
+        Insert: {
+          coupon_id?: string | null
+          device?: string | null
+          id?: string
+          ip_address?: string | null
+          scan_time?: string
+          success?: boolean
+          token: string
+        }
+        Update: {
+          coupon_id?: string | null
+          device?: string | null
+          id?: string
+          ip_address?: string | null
+          scan_time?: string
+          success?: boolean
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scans_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
         Relationships: []
       }
     }
@@ -61,10 +161,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -191,6 +297,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
