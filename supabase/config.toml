@@ -1,0 +1,4 @@
+project_id = "lyqakutwidrnmosqgvrb"
+
+[functions.coupons]
+verify_jwt = false
