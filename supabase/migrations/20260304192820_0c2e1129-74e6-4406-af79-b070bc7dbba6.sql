@@ -1,0 +1,2 @@
+ALTER TABLE public.coupons DROP CONSTRAINT coupons_status_check;
+ALTER TABLE public.coupons ADD CONSTRAINT coupons_status_check CHECK (status IN ('unused', 'scanned', 'claimed', 'redeemed', 'expired'));
