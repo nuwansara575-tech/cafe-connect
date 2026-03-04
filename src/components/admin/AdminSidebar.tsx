@@ -33,7 +33,7 @@ export function AdminSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
-        {!collapsed && <img alt="Cafe Connect" className="h-8 object-contain" src="/lovable-uploads/afe08f13-99df-4712-b30b-39694af91039.png" />}
+        {!collapsed && <img alt="Cafe Connect" className="h-16 object-contain" src="/lovable-uploads/afe08f13-99df-4712-b30b-39694af91039.png" />}
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
