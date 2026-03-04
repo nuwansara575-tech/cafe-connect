@@ -63,6 +63,9 @@ const Index = () => {
           )}
         </motion.div>
       </main>
+      <div className="absolute bottom-6 left-0 right-0 text-center">
+        <p className="text-xs text-muted-foreground">Powered by ZIP Solutions</p>
+      </div>
     </div>);
 };
 
