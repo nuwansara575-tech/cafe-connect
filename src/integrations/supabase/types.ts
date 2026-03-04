@@ -54,6 +54,7 @@ export type Database = {
           claimed_at: string | null
           coupon_code: string
           created_at: string
+          customer_id: string | null
           customer_name: string | null
           customer_phone: string | null
           discount_value: string
@@ -72,6 +73,7 @@ export type Database = {
           claimed_at?: string | null
           coupon_code: string
           created_at?: string
+          customer_id?: string | null
           customer_name?: string | null
           customer_phone?: string | null
           discount_value?: string
@@ -90,6 +92,7 @@ export type Database = {
           claimed_at?: string | null
           coupon_code?: string
           created_at?: string
+          customer_id?: string | null
           customer_name?: string | null
           customer_phone?: string | null
           discount_value?: string
@@ -110,7 +113,56 @@ export type Database = {
             referencedRelation: "campaigns"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "coupons_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      customers: {
+        Row: {
+          birthday: string | null
+          created_at: string
+          email: string | null
+          first_scan_date: string | null
+          id: string
+          last_activity: string | null
+          mobile_number: string
+          name: string
+          total_claims: number
+          total_redemptions: number
+          total_scans: number
+        }
+        Insert: {
+          birthday?: string | null
+          created_at?: string
+          email?: string | null
+          first_scan_date?: string | null
+          id?: string
+          last_activity?: string | null
+          mobile_number: string
+          name: string
+          total_claims?: number
+          total_redemptions?: number
+          total_scans?: number
+        }
+        Update: {
+          birthday?: string | null
+          created_at?: string
+          email?: string | null
+          first_scan_date?: string | null
+          id?: string
+          last_activity?: string | null
+          mobile_number?: string
+          name?: string
+          total_claims?: number
+          total_redemptions?: number
+          total_scans?: number
+        }
+        Relationships: []
       }
       scans: {
         Row: {

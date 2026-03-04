@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Megaphone, Ticket, BarChart3, QrCode, ShieldCheck } from
+  LayoutDashboard, Megaphone, Ticket, BarChart3, QrCode, ShieldCheck, Users } from
 "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -21,6 +21,7 @@ const items = [
 { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
 { title: "Campaigns", url: "/admin/campaigns", icon: Megaphone },
 { title: "Coupons", url: "/admin/coupons", icon: Ticket },
+{ title: "Customers", url: "/admin/customers", icon: Users },
 { title: "Redeem", url: "/admin/redeem", icon: ShieldCheck },
 { title: "Generate QR", url: "/admin/generate", icon: QrCode },
 { title: "Analytics", url: "/admin/analytics", icon: BarChart3 }];
