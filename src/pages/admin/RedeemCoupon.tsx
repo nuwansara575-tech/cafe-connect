@@ -94,7 +94,7 @@ export default function RedeemCoupon() {
       </div>
 
       {/* Search Card */}
-      <Card className="relative overflow-hidden">
+      <Card className="relative overflow-hidden glass-strong border-border/40">
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary/80 to-primary/50" />
         <CardContent className="p-6 pt-8">
           <div className="flex items-center gap-2 mb-4">
@@ -135,7 +135,7 @@ export default function RedeemCoupon() {
 
       {/* Coupon Details Card */}
       {coupon && (
-        <Card className="relative overflow-hidden">
+        <Card className="relative overflow-hidden glass-strong border-border/40">
           {/* Status indicator stripe */}
           <div className={`absolute top-0 left-0 right-0 h-1 ${
             canRedeem ? "bg-blue-500" : coupon.status === "redeemed" ? "bg-emerald-500" : "bg-destructive"

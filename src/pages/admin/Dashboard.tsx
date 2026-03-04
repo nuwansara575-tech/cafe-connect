@@ -124,7 +124,7 @@ export default function Dashboard() {
       {/* Primary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {primaryCards.map((c) => (
-          <Card key={c.label} className={`relative overflow-hidden bg-gradient-to-br ${c.gradient} border`}>
+          <Card key={c.label} className={`relative overflow-hidden glass border-border/40 bg-gradient-to-br ${c.gradient}`}>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
@@ -142,7 +142,7 @@ export default function Dashboard() {
       </div>
 
       {/* Status Breakdown */}
-      <Card>
+      <Card className="glass-strong border-border/40">
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-semibold">Coupon Status Breakdown</CardTitle>
           <p className="text-xs text-muted-foreground">Current distribution of all coupons by status</p>
@@ -196,7 +196,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Rates Column */}
         <div className="space-y-4">
-          <Card>
+          <Card className="glass border-border/40">
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-1">
                 <HandCoins className="w-4 h-4 text-blue-500" />
@@ -208,7 +208,7 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="glass border-border/40">
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-1">
                 <BarChart3 className="w-4 h-4 text-primary" />
@@ -223,7 +223,7 @@ export default function Dashboard() {
         </div>
 
         {/* Chart */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 glass-strong border-border/40">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">Daily Scans — Last 14 Days</CardTitle>
             <p className="text-xs text-muted-foreground">QR code scan activity over the past two weeks</p>

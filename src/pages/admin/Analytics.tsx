@@ -103,7 +103,7 @@ export default function Analytics() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {kpiCards.map((kpi) => (
-          <Card key={kpi.label} className="relative overflow-hidden">
+          <Card key={kpi.label} className="relative overflow-hidden glass border-border/40">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-2">
                 <kpi.icon className={`w-4 h-4 ${kpi.color}`} />
@@ -118,7 +118,7 @@ export default function Analytics() {
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Pie Chart */}
-        <Card>
+        <Card className="glass-strong border-border/40">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">Coupon Status Breakdown</CardTitle>
             <p className="text-xs text-muted-foreground">Distribution of all coupons by current status</p>
@@ -172,7 +172,7 @@ export default function Analytics() {
         </Card>
 
         {/* Daily Claims Bar Chart */}
-        <Card>
+        <Card className="glass-strong border-border/40">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">Daily Claims</CardTitle>
             <p className="text-xs text-muted-foreground">Number of coupons claimed per day</p>
@@ -205,7 +205,7 @@ export default function Analytics() {
         </Card>
 
         {/* Daily Redemptions Line Chart */}
-        <Card>
+        <Card className="glass-strong border-border/40">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">Daily Redemptions</CardTitle>
             <p className="text-xs text-muted-foreground">Number of coupons redeemed per day</p>
@@ -238,7 +238,7 @@ export default function Analytics() {
         </Card>
 
         {/* Campaign Comparison */}
-        <Card>
+        <Card className="glass-strong border-border/40">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">Campaign Comparison</CardTitle>
             <p className="text-xs text-muted-foreground">Total vs claimed vs redeemed per campaign</p>
@@ -275,7 +275,7 @@ export default function Analytics() {
       </div>
 
       {/* Status Legend Table */}
-      <Card>
+      <Card className="glass-strong border-border/40">
         <CardHeader className="pb-2">
           <CardTitle className="text-base font-semibold">Status Summary</CardTitle>
         </CardHeader>
