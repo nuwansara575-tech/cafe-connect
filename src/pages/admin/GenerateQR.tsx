@@ -69,7 +69,7 @@ export default function GenerateQR() {
         <p className="text-sm text-muted-foreground mt-1">Create bulk QR coupons for your campaigns</p>
       </div>
 
-      <Card>
+      <Card className="glass-strong border-border/40">
         <CardContent className="p-6 space-y-5">
           {campaigns.length > 0 && (
             <div className="space-y-1.5">
