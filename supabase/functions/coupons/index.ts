@@ -131,7 +131,8 @@ serve(async (req) => {
         .maybeSingle();
 
       if (updateErr || !updated) {
-        return jsonResponse({ error: "Failed to claim coupon" }, 500);
+        console.error("Claim update failed:", updateErr, "updated:", updated);
+        return jsonResponse({ error: "Failed to claim coupon", detail: updateErr?.message || "No rows updated" }, 500);
       }
 
       return jsonResponse({
