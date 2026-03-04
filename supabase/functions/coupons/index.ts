@@ -25,46 +25,6 @@ async function requireAdmin(req: Request, supabase: any): Promise<Response | nul
   return null;
 }
 
-async function upsertCustomer(supabase: any, phone: string, name: string, email?: string, birthday?: string) {
-  // Check if customer exists by mobile_number
-  const { data: existing } = await supabase
-    .from("customers")
-    .select("id, total_claims")
-    .eq("mobile_number", phone)
-    .maybeSingle();
-
-  if (existing) {
-    // Update existing customer
-    const updates: any = {
-      total_claims: (existing.total_claims || 0) + 1,
-      last_activity: new Date().toISOString(),
-    };
-    if (name) updates.name = name;
-    if (email) updates.email = email;
-    if (birthday) updates.birthday = birthday;
-
-    await supabase.from("customers").update(updates).eq("id", existing.id);
-    return existing.id;
-  } else {
-    // Create new customer
-    const { data: newCustomer, error } = await supabase.from("customers").insert({
-      name,
-      mobile_number: phone,
-      email: email || null,
-      birthday: birthday || null,
-      total_claims: 1,
-      first_scan_date: new Date().toISOString(),
-      last_activity: new Date().toISOString(),
-    }).select("id").single();
-
-    if (error) {
-      console.error("Customer insert error:", error);
-      return null;
-    }
-    return newCustomer.id;
-  }
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -122,15 +82,12 @@ serve(async (req) => {
       });
     }
 
-    // CLAIM — customer submits details to claim coupon
+    // CLAIM — customer submits phone number to claim coupon
     if (req.method === "POST" && action === "claim") {
-      const { token, phone, name, email, birthday } = await req.json();
+      const { token, phone, name } = await req.json();
       if (!token) return jsonResponse({ error: "Token required" }, 400);
-      if (!phone || typeof phone !== "string" || phone.replace(/[\s\-()]/g, "").length < 9) {
+      if (!phone || typeof phone !== "string" || phone.trim().length < 7) {
         return jsonResponse({ error: "Valid phone number required" }, 400);
-      }
-      if (!name || typeof name !== "string" || name.trim().length < 1) {
-        return jsonResponse({ error: "Name is required" }, 400);
       }
 
       // Get coupon
@@ -153,22 +110,21 @@ serve(async (req) => {
         return jsonResponse({ error: "Coupon expired", status: "expired" }, 409);
       }
 
-      // Upsert customer
-      const customerId = await upsertCustomer(supabase, phone.trim(), name.trim(), email?.trim(), birthday);
+      // Check duplicate phone for same coupon
+      if (coupon.customer_phone && coupon.customer_phone === phone.trim()) {
+        return jsonResponse({ error: "Already claimed with this phone", status: "claimed" }, 409);
+      }
 
       // Update coupon to claimed
-      const updatePayload: any = {
-        status: "claimed",
-        claimed_at: new Date().toISOString(),
-        scanned_at: coupon.scanned_at || new Date().toISOString(),
-        customer_phone: phone.trim(),
-        customer_name: name.trim(),
-      };
-      if (customerId) updatePayload.customer_id = customerId;
-
       const { data: updated, error: updateErr } = await supabase
         .from("coupons")
-        .update(updatePayload)
+        .update({
+          status: "claimed",
+          claimed_at: new Date().toISOString(),
+          scanned_at: coupon.scanned_at || new Date().toISOString(),
+          customer_phone: phone.trim(),
+          customer_name: name?.trim() || null,
+        })
         .eq("id", coupon.id)
         .in("status", ["unused", "scanned"])
         .select()
@@ -196,6 +152,7 @@ serve(async (req) => {
       const { coupon_code } = await req.json();
       if (!coupon_code) return jsonResponse({ error: "Coupon code required" }, 400);
 
+      // Look up coupon by code
       const { data: coupon, error } = await supabase
         .from("coupons").select("*").eq("coupon_code", coupon_code.trim().toUpperCase()).maybeSingle();
 
@@ -211,6 +168,7 @@ serve(async (req) => {
         return jsonResponse({ error: "Coupon must be claimed by customer first", status: coupon.status }, 409);
       }
 
+      // Check expiry
       if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
         await supabase.from("coupons").update({ status: "expired" }).eq("id", coupon.id);
         return jsonResponse({ error: "Coupon expired", status: "expired" }, 409);
@@ -226,17 +184,6 @@ serve(async (req) => {
         .maybeSingle();
 
       if (redeemErr || !redeemed) return jsonResponse({ error: "Failed to redeem" }, 500);
-
-      // Update customer redemption count
-      if (redeemed.customer_id) {
-        const { data: cust } = await supabase.from("customers").select("total_redemptions").eq("id", redeemed.customer_id).single();
-        if (cust) {
-          await supabase.from("customers").update({
-            total_redemptions: (cust.total_redemptions || 0) + 1,
-            last_activity: new Date().toISOString(),
-          }).eq("id", redeemed.customer_id);
-        }
-      }
 
       return jsonResponse({
         success: true,
@@ -284,18 +231,14 @@ serve(async (req) => {
 
       const { data: all } = await supabase.from("coupons").select("status");
       const total = all?.length || 0;
-      const redeemed = all?.filter((c: any) => c.status === "redeemed").length || 0;
-      const claimed = all?.filter((c: any) => c.status === "claimed").length || 0;
-      const scanned = all?.filter((c: any) => c.status === "scanned").length || 0;
-      const unused = all?.filter((c: any) => c.status === "unused").length || 0;
-      const expired = all?.filter((c: any) => c.status === "expired").length || 0;
-
-      // Customer stats
-      const { count: totalCustomers } = await supabase.from("customers").select("id", { count: "exact", head: true });
+      const redeemed = all?.filter((c) => c.status === "redeemed").length || 0;
+      const claimed = all?.filter((c) => c.status === "claimed").length || 0;
+      const scanned = all?.filter((c) => c.status === "scanned").length || 0;
+      const unused = all?.filter((c) => c.status === "unused").length || 0;
+      const expired = all?.filter((c) => c.status === "expired").length || 0;
 
       return jsonResponse({
         total, redeemed, claimed, scanned, unused, expired,
-        total_customers: totalCustomers || 0,
         conversion_rate: total > 0 ? ((redeemed / total) * 100).toFixed(1) : "0",
         claim_rate: total > 0 ? ((claimed / total) * 100).toFixed(1) : "0",
       });
