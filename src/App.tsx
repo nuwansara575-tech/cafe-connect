@@ -18,6 +18,12 @@ const Coupons = lazy(() => import("./pages/admin/Coupons"));
 const GenerateQR = lazy(() => import("./pages/admin/GenerateQR"));
 const Analytics = lazy(() => import("./pages/admin/Analytics"));
 const RedeemCoupon = lazy(() => import("./pages/admin/RedeemCoupon"));
+const LoyaltyDashboard = lazy(() => import("./pages/admin/LoyaltyDashboard"));
+const LoyaltyMembers = lazy(() => import("./pages/admin/LoyaltyMembers"));
+const LoyaltyRewards = lazy(() => import("./pages/admin/LoyaltyRewards"));
+const LoyaltyRedeem = lazy(() => import("./pages/admin/LoyaltyRedeem"));
+const LoyaltyTransactions = lazy(() => import("./pages/admin/LoyaltyTransactions"));
+const LoyaltyPointRules = lazy(() => import("./pages/admin/LoyaltyPointRules"));
 
 const queryClient = new QueryClient();
 
@@ -40,6 +46,12 @@ const App = () => (
                 <Route path="generate" element={<GenerateQR />} />
                 <Route path="redeem" element={<RedeemCoupon />} />
                 <Route path="analytics" element={<Analytics />} />
+                <Route path="loyalty" element={<LoyaltyDashboard />} />
+                <Route path="loyalty/members" element={<LoyaltyMembers />} />
+                <Route path="loyalty/rewards" element={<LoyaltyRewards />} />
+                <Route path="loyalty/redeem" element={<LoyaltyRedeem />} />
+                <Route path="loyalty/transactions" element={<LoyaltyTransactions />} />
+                <Route path="loyalty/rules" element={<LoyaltyPointRules />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
