@@ -132,7 +132,7 @@ serve(async (req) => {
 
       if (updateErr || !updated) {
         console.error("Claim update failed:", updateErr, "updated:", updated);
-        return jsonResponse({ error: "Failed to claim coupon", detail: updateErr?.message || "No rows updated" }, 500);
+        return jsonResponse({ error: "Failed to claim coupon" }, 500);
       }
 
       return jsonResponse({
