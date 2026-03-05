@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,55 @@ import ccLogoWhite from "@/assets/cc-logo-white.png";
 import giftBox from "@/assets/gift-box.png";
 import openBox from "@/assets/open-box.png";
 import checkImg from "@/assets/check.png";
+
+// Confetti particle component
+const Particle = ({ delay, x, y, color, size }: { delay: number; x: number; y: number; color: string; size: number }) => (
+  <motion.div
+    className="absolute rounded-full pointer-events-none"
+    style={{ backgroundColor: color, width: size, height: size }}
+    initial={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+    animate={{
+      opacity: [1, 1, 0],
+      x: x,
+      y: y,
+      scale: [0, 1.2, 0.8],
+      rotate: [0, Math.random() * 360],
+    }}
+    transition={{ duration: 0.8, delay, ease: "easeOut" }}
+  />
+);
+
+const CONFETTI_COLORS = [
+  "hsl(22, 97%, 54%)",   // primary orange
+  "hsl(30, 90%, 50%)",   // warm orange
+  "hsl(45, 93%, 58%)",   // gold
+  "hsl(0, 0%, 100%)",    // white
+  "hsl(22, 97%, 70%)",   // light orange
+  "hsl(340, 82%, 52%)",  // pink
+];
+
+const ConfettiBurst = ({ show }: { show: boolean }) => {
+  if (!show) return null;
+  const particles = Array.from({ length: 24 }, (_, i) => {
+    const angle = (i / 24) * Math.PI * 2;
+    const distance = 60 + Math.random() * 80;
+    return {
+      id: i,
+      x: Math.cos(angle) * distance,
+      y: Math.sin(angle) * distance - 20,
+      delay: Math.random() * 0.15,
+      color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+      size: 4 + Math.random() * 6,
+    };
+  });
+  return (
+    <div className="absolute inset-0 flex items-center justify-center overflow-visible z-50 pointer-events-none">
+      {particles.map((p) => (
+        <Particle key={p.id} {...p} />
+      ))}
+    </div>
+  );
+};
 
 type CouponState = "loading" | "scanned" | "claimed" | "redeemed" | "expired" | "invalid" | "claiming" | "success";
 
@@ -31,6 +80,8 @@ const Redeem = () => {
   const [copied, setCopied] = useState(false);
   const [claimError, setClaimError] = useState("");
   const submitting = useRef(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [buttonPressed, setButtonPressed] = useState(false);
 
   useEffect(() => {
     if (!token) { setState("invalid"); return; }
@@ -74,7 +125,9 @@ const Redeem = () => {
         return;
       }
       setData((prev) => ({ ...prev, coupon_code: result.coupon_code }));
+      setShowConfetti(true);
       setState("success");
+      setTimeout(() => setShowConfetti(false), 1200);
     } catch {
       setClaimError("Something went wrong. Please try again.");
       setState("scanned");
@@ -174,11 +227,28 @@ const Redeem = () => {
                 <p className="text-[13px] text-destructive mb-3 text-center font-medium">{claimError}</p>
               )}
 
-              <Button onClick={handleClaim} size="lg"
-                className="w-full gradient-cafe text-primary-foreground text-[16px] py-[14px] rounded-[14px] font-semibold h-auto shadow-cafe"
-              >
-                Claim Coupon
-              </Button>
+              <motion.div className="relative">
+                <Button
+                  onClick={() => {
+                    setButtonPressed(true);
+                    handleClaim();
+                  }}
+                  size="lg"
+                  className="w-full gradient-cafe text-primary-foreground text-[16px] py-[14px] rounded-[14px] font-semibold h-auto shadow-cafe relative overflow-hidden group"
+                  asChild={false}
+                >
+                  <motion.span
+                    whileTap={{ scale: 0.96 }}
+                    className="flex items-center justify-center gap-2 w-full"
+                  >
+                    <Sparkles className="w-[18px] h-[18px] opacity-80 group-hover:opacity-100 transition-opacity" />
+                    Claim Coupon
+                  </motion.span>
+                  {/* Shimmer sweep */}
+                  <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
+                </Button>
+                <ConfettiBurst show={buttonPressed && showConfetti} />
+              </motion.div>
               <p className="text-[11px] text-muted-foreground mt-3 text-center">
                 Your coupon code will be sent to your phone
               </p>
@@ -200,16 +270,17 @@ const Redeem = () => {
         {state === "success" && (
           <motion.div key="success" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
             transition={cardTransition}
-            className="bg-card rounded-3xl shadow-xl max-w-sm w-full overflow-hidden"
+            className="bg-card rounded-3xl shadow-xl max-w-sm w-full overflow-hidden relative"
           >
+            <ConfettiBurst show={showConfetti} />
             <div className="flex flex-col items-center pt-6 pb-5 px-6">
               <motion.img
                 src={openBox}
                 alt="Coupon Claimed"
                 className="w-[80px] h-[80px] mb-4"
                 initial={{ scale: 0, rotate: -15 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: "spring", delay: 0.15 }}
+                animate={{ scale: [0, 1.15, 1], rotate: [-15, 5, 0] }}
+                transition={{ type: "spring", delay: 0.15, duration: 0.6 }}
               />
               <h2 className="text-[26px] font-extrabold text-primary mb-2">Coupon Claimed!</h2>
               <p className="text-[13px] text-muted-foreground mb-5">Show this code to the cashier at the counter:</p>
