@@ -12,49 +12,7 @@ import openBox from "@/assets/open-box.png";
 import checkImg from "@/assets/check.png";
 
 // Cafe emoji burst elements
-const CAFE_EMOJIS = ["☕", "🫘", "🍩", "🧁", "🍪", "☕", "🫘", "☕"];
-
-const EmojiParticle = ({ delay, x, y, emoji, size }: { delay: number; x: number; y: number; emoji: string; size: number }) => (
-  <motion.div
-    className="absolute pointer-events-none select-none"
-    style={{ fontSize: size }}
-    initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
-    animate={{
-      opacity: [0, 1, 1, 0],
-      x: x,
-      y: y,
-      scale: [0, 1.3, 1, 0.6],
-      rotate: [0, Math.random() > 0.5 ? 180 : -180],
-    }}
-    transition={{ duration: 1.1, delay, ease: [0.22, 1, 0.36, 1] }}
-  />
-);
-
-const DotParticle = ({ delay, x, y, color, size }: { delay: number; x: number; y: number; color: string; size: number }) => (
-  <motion.div
-    className="absolute rounded-full pointer-events-none"
-    style={{ backgroundColor: color, width: size, height: size }}
-    initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
-    animate={{
-      opacity: [0, 1, 1, 0],
-      x: x,
-      y: y,
-      scale: [0, 1.5, 1, 0],
-    }}
-    transition={{ duration: 0.9, delay, ease: [0.22, 1, 0.36, 1] }}
-  />
-);
-
-// Ring burst effect (like Lovable's expanding ring)
-const RingBurst = () => (
-  <motion.div
-    className="absolute rounded-full border-2 pointer-events-none"
-    style={{ borderColor: "hsl(22, 97%, 54%)" }}
-    initial={{ width: 0, height: 0, opacity: 0.8 }}
-    animate={{ width: 200, height: 200, opacity: 0 }}
-    transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-  />
-);
+const CAFE_EMOJIS = ["☕", "🫘", "🍩", "🧁", "🍪", "☕", "🫘", "☕", "🍰", "🧋"];
 
 const CONFETTI_COLORS = [
   "hsl(22, 97%, 54%)",
@@ -63,54 +21,133 @@ const CONFETTI_COLORS = [
   "hsl(25, 60%, 40%)",
   "hsl(22, 97%, 70%)",
   "hsl(0, 0%, 100%)",
+  "hsl(340, 82%, 52%)",
+  "hsl(15, 85%, 60%)",
 ];
 
-const ConfettiBurst = ({ show }: { show: boolean }) => {
+// Full-page celebration overlay
+const FullPageCelebration = ({ show }: { show: boolean }) => {
   if (!show) return null;
 
-  const emojis = Array.from({ length: 10 }, (_, i) => {
-    const angle = (i / 10) * Math.PI * 2;
-    const distance = 70 + Math.random() * 60;
+  // Falling cafe emojis from top
+  const fallingEmojis = Array.from({ length: 20 }, (_, i) => ({
+    id: `fall-${i}`,
+    emoji: CAFE_EMOJIS[i % CAFE_EMOJIS.length],
+    left: `${5 + Math.random() * 90}%`,
+    delay: Math.random() * 0.6,
+    duration: 1.5 + Math.random() * 1,
+    size: 20 + Math.random() * 16,
+    rotate: Math.random() > 0.5 ? 360 : -360,
+  }));
+
+  // Radial burst dots from center
+  const burstDots = Array.from({ length: 30 }, (_, i) => {
+    const angle = (i / 30) * Math.PI * 2;
+    const distance = 150 + Math.random() * 250;
     return {
-      id: `e-${i}`,
+      id: `burst-${i}`,
       x: Math.cos(angle) * distance,
-      y: Math.sin(angle) * distance - 30,
-      delay: 0.05 + Math.random() * 0.15,
-      emoji: CAFE_EMOJIS[i % CAFE_EMOJIS.length],
-      size: 18 + Math.random() * 10,
+      y: Math.sin(angle) * distance,
+      delay: Math.random() * 0.2,
+      color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+      size: 4 + Math.random() * 8,
     };
   });
 
-  const dots = Array.from({ length: 16 }, (_, i) => {
-    const angle = (i / 16) * Math.PI * 2;
-    const distance = 40 + Math.random() * 100;
+  // Radial burst emojis from center
+  const burstEmojis = Array.from({ length: 12 }, (_, i) => {
+    const angle = (i / 12) * Math.PI * 2;
+    const distance = 120 + Math.random() * 180;
     return {
-      id: `d-${i}`,
+      id: `bemoji-${i}`,
+      emoji: CAFE_EMOJIS[i % CAFE_EMOJIS.length],
       x: Math.cos(angle) * distance,
-      y: Math.sin(angle) * distance - 10,
-      delay: Math.random() * 0.12,
-      color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
-      size: 3 + Math.random() * 5,
+      y: Math.sin(angle) * distance - 40,
+      delay: 0.1 + Math.random() * 0.2,
+      size: 24 + Math.random() * 14,
     };
   });
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center overflow-visible z-50 pointer-events-none">
-      <RingBurst />
+    <motion.div
+      className="fixed inset-0 z-[100] pointer-events-none overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      {/* Flash overlay */}
       <motion.div
-        className="absolute rounded-full pointer-events-none"
+        className="absolute inset-0"
         style={{ backgroundColor: "hsl(22, 97%, 54%)" }}
-        initial={{ width: 0, height: 0, opacity: 0.3 }}
-        animate={{ width: 120, height: 120, opacity: 0 }}
-        transition={{ duration: 0.5, delay: 0.08, ease: "easeOut" }}
+        initial={{ opacity: 0.4 }}
+        animate={{ opacity: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
       />
-      {emojis.map((p) => (
-        <EmojiParticle key={p.id} {...p} />
+
+      {/* Expanding rings from center */}
+      {[0, 0.15, 0.3].map((delay, i) => (
+        <motion.div
+          key={`ring-${i}`}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 pointer-events-none"
+          style={{ borderColor: `hsl(22, 97%, ${54 + i * 10}%)` }}
+          initial={{ width: 0, height: 0, opacity: 0.7 }}
+          animate={{ width: 600, height: 600, opacity: 0 }}
+          transition={{ duration: 1, delay, ease: [0.22, 1, 0.36, 1] }}
+        />
       ))}
-      {dots.map((p) => (
-        <DotParticle key={p.id} {...p} />
+
+      {/* Center burst dots */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        {burstDots.map((p) => (
+          <motion.div
+            key={p.id}
+            className="absolute rounded-full"
+            style={{ backgroundColor: p.color, width: p.size, height: p.size }}
+            initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
+            animate={{
+              opacity: [0, 1, 1, 0],
+              x: p.x,
+              y: p.y,
+              scale: [0, 1.5, 1, 0],
+            }}
+            transition={{ duration: 1.2, delay: p.delay, ease: [0.22, 1, 0.36, 1] }}
+          />
+        ))}
+        {burstEmojis.map((p) => (
+          <motion.div
+            key={p.id}
+            className="absolute select-none"
+            style={{ fontSize: p.size }}
+            initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
+            animate={{
+              opacity: [0, 1, 1, 0],
+              x: p.x,
+              y: p.y,
+              scale: [0, 1.3, 1, 0.5],
+              rotate: [0, Math.random() > 0.5 ? 200 : -200],
+            }}
+            transition={{ duration: 1.3, delay: p.delay, ease: [0.22, 1, 0.36, 1] }}
+          />
+        ))}
+      </div>
+
+      {/* Falling emojis from top */}
+      {fallingEmojis.map((p) => (
+        <motion.div
+          key={p.id}
+          className="absolute select-none"
+          style={{ left: p.left, fontSize: p.size, top: -40 }}
+          initial={{ opacity: 0, y: -40, rotate: 0 }}
+          animate={{
+            opacity: [0, 1, 1, 0.8, 0],
+            y: window.innerHeight + 60,
+            rotate: p.rotate,
+          }}
+          transition={{ duration: p.duration, delay: p.delay, ease: [0.25, 0.1, 0.25, 1] }}
+        />
       ))}
-    </div>
+    </motion.div>
   );
 };
 
@@ -181,7 +218,7 @@ const Redeem = () => {
       setData((prev) => ({ ...prev, coupon_code: result.coupon_code }));
       setShowConfetti(true);
       setState("success");
-      setTimeout(() => setShowConfetti(false), 1200);
+      setTimeout(() => setShowConfetti(false), 2500);
     } catch {
       setClaimError("Something went wrong. Please try again.");
       setState("scanned");
@@ -301,7 +338,7 @@ const Redeem = () => {
                   {/* Shimmer sweep */}
                   <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
                 </Button>
-                <ConfettiBurst show={buttonPressed && showConfetti} />
+                <FullPageCelebration show={buttonPressed && showConfetti} />
               </motion.div>
               <p className="text-[11px] text-muted-foreground mt-3 text-center">
                 Your coupon code will be sent to your phone
@@ -326,7 +363,7 @@ const Redeem = () => {
             transition={cardTransition}
             className="bg-card rounded-3xl shadow-xl max-w-sm w-full overflow-hidden relative"
           >
-            <ConfettiBurst show={showConfetti} />
+            <FullPageCelebration show={showConfetti} />
             <div className="flex flex-col items-center pt-6 pb-5 px-6">
               <motion.img
                 src={openBox}
