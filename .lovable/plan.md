@@ -1,106 +1,60 @@
 
 
-## Plan: Full CRM Dashboard for Cafe Connect Promotion
+## Plan: Match Redeem Page to Figma Design
 
-This is a significant expansion from the current simple admin panel to a full CRM system with campaigns, scan tracking, authentication, and richer analytics.
+### Key Changes from Current Implementation
 
-### Current State
-- **Database**: Single `coupons` table with basic fields, no campaigns or scans tables
-- **Edge function**: Single `coupons` function handling generate/validate/redeem/stats
-- **Admin page**: Basic 3-tab panel (generate, list, analytics) with no auth, no search, no campaign management
-- **No authentication**: Admin panel is completely open
+Based on the Figma design and uploaded reference image, these are the differences to fix:
 
-### What We'll Build
+**1. Remove liquid glass effects** -- Replace `glass-strong` cards with solid white (`bg-white`) cards with large rounded corners (`rounded-3xl`). Remove the ambient blur blobs from the background.
 
-#### 1. Database Schema (Migration)
+**2. Card layout** -- The white card starts partway down the orange background and extends to the bottom of the viewport (no bottom rounded corners visible). The card has rounded top corners only and fills remaining space.
 
-**New `campaigns` table:**
-- id, name, description, offer, start_date, end_date, status (active/expired), created_at
+**3. Typography -- all Inter font family:**
+- Discount value (e.g. "10% OFF"): ~28px bold, orange color (`text-primary`)
+- Offer title (e.g. "Get 10% OFF your order"): ~16px semibold, black
+- Offer description: ~13px regular, dark gray
+- Labels ("Mobile Number", "Name"): ~13px medium, dark/black
+- Placeholder text: ~14px regular, gray
+- Button text ("Claim Coupon"): ~16px semibold, white
+- Footer hint: ~11px, gray
+- "Coupon Claimed" heading: ~26px bold, orange
+- "Already Claimed" heading: ~26px bold, orange
+- Coupon code: ~18px mono bold
+- Campaign subtitle under logo: ~13px, white/light
 
-**New `scans` table:**
-- id, coupon_id (FK to coupons), token, scan_time, device, ip_address, success (boolean)
+**4. Input fields** -- Simple bordered inputs with light gray background, rounded corners (~12px radius), no colored borders. Height ~44px.
 
-**Modify `coupons` table:**
-- Add `campaign_id` column (FK to campaigns, nullable for backward compatibility)
+**5. Button** -- Full-width solid orange button (gradient-cafe), large rounded corners (~14px), no excessive shadow. Padding ~14px vertical.
 
-**RLS policies:**
-- Campaigns: authenticated users can CRUD
-- Scans: authenticated users can read; edge function inserts via service role
-- Coupons: add INSERT/UPDATE policies for authenticated users
+**6. Logo** -- Centered at top, roughly h-10 to h-12 size.
 
-**User roles:**
-- Create `app_role` enum and `user_roles` table with `has_role()` security definer function
-- Admin role required for dashboard access
+**7. Success screen (Coupon Claimed):**
+- Open box image centered on the orange area above the card
+- "Coupon Claimed" in orange, bold
+- Coupon code in a bordered box with copy button
+- Helper text below
 
-#### 2. Authentication
+**8. Already Claimed screen:**
+- Green checkmark circle icon (using the check.png asset)
+- "Already Claimed" in orange bold
+- Subtitle text in gray
 
-- Create login page at `/login` with email/password
-- Create auth context/hook for session management
-- Protect `/admin/*` routes behind auth guard
-- No signup form (admins created manually or via a seed)
+**9. Remove "Powered by ZIP Solutions" footer** -- Not visible in the Figma design (or make it very subtle).
 
-#### 3. Edge Function Updates
+### Files to Modify
 
-**Update `coupons/index.ts`:**
-- On `redeem` action: record a scan entry (success=true) with device/IP info from request headers
-- On `validate` action: record a scan entry (success depends on status) 
-- Add campaign CRUD endpoints or handle campaigns client-side via Supabase SDK
+- **`src/pages/Redeem.tsx`** -- Complete restyle of all state cards:
+  - Remove ambient blob divs
+  - Replace `glass-strong` with `bg-white`
+  - Change card shape to rounded-top-only, full-width bottom
+  - Adjust all font sizes, weights, and families to match Figma
+  - Adjust spacing and padding
+  - Remove excessive shadows
+  - Ensure all text uses Inter (`font-sans` or explicit `font-[Inter]`)
+  - Headings should also use Inter (override the Playfair Display default for h1-h4)
 
-#### 4. Admin CRM Dashboard (Complete Rebuild)
+- **`src/index.css`** -- Potentially no changes needed; Inter is already imported. May need to ensure the `font-[Inter]` override works on headings within the redeem page.
 
-Replace the current single-page Admin with a sidebar-based dashboard layout:
-
-**Pages/Sections:**
-- **Dashboard Home** -- overview cards (total QR codes, total scans, total redemptions, redemption rate) + daily scan chart (recharts)
-- **Campaigns** -- list campaigns in table, create/edit campaign dialog, each campaign shows its coupon count
-- **Coupons** -- full table view with search (by token or code), status filter, sortable columns, bulk actions (deactivate/expire), download QR
-- **Analytics** -- charts for daily scans, redemption rate over time, campaign comparison
-- **QR Generator** -- select campaign, set discount/count, generate bulk coupons
-
-**Layout:** Sidebar navigation with icons, header with user info and logout button.
-
-#### 5. Scan Tracking
-
-- Edge function captures `user-agent` and `x-forwarded-for` headers on validate/redeem calls
-- Inserts into `scans` table
-- Admin can view scan history per coupon
-
-### Technical Approach
-
-```text
-src/
-├── pages/
-│   ├── Login.tsx              (new)
-│   ├── admin/
-│   │   ├── AdminLayout.tsx    (new - sidebar + outlet)
-│   │   ├── Dashboard.tsx      (new - overview)
-│   │   ├── Campaigns.tsx      (new - campaign CRUD)
-│   │   ├── Coupons.tsx        (new - table with search/filter)
-│   │   ├── Analytics.tsx      (new - charts)
-│   │   └── GenerateQR.tsx     (new - QR generation)
-│   ├── Index.tsx
-│   └── Redeem.tsx
-├── components/
-│   ├── ProtectedRoute.tsx     (new)
-│   └── admin/
-│       ├── StatsCards.tsx      (new)
-│       ├── CouponTable.tsx    (new)
-│       ├── CampaignDialog.tsx (new)
-│       └── ScanChart.tsx      (new)
-├── hooks/
-│   └── useAuth.tsx            (new)
-```
-
-### Implementation Order
-
-1. **Database migration** -- create campaigns, scans tables; alter coupons; set up auth roles and RLS
-2. **Authentication** -- login page, auth hook, protected routes
-3. **Admin layout** -- sidebar-based layout with routing
-4. **Dashboard home** -- stats cards + daily chart
-5. **Campaign management** -- CRUD campaigns
-6. **Coupon management** -- searchable/filterable table, status actions, QR download
-7. **QR generation** -- linked to campaigns
-8. **Analytics page** -- detailed charts
-9. **Edge function update** -- scan tracking with device/IP
-10. **Cleanup** -- remove old Admin.tsx, update routes
+### No database or backend changes required.
 
