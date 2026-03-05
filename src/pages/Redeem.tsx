@@ -11,50 +11,104 @@ import giftBox from "@/assets/gift-box.png";
 import openBox from "@/assets/open-box.png";
 import checkImg from "@/assets/check.png";
 
-// Confetti particle component
-const Particle = ({ delay, x, y, color, size }: { delay: number; x: number; y: number; color: string; size: number }) => (
+// Cafe emoji burst elements
+const CAFE_EMOJIS = ["☕", "🫘", "🍩", "🧁", "🍪", "☕", "🫘", "☕"];
+
+const EmojiParticle = ({ delay, x, y, emoji, size }: { delay: number; x: number; y: number; emoji: string; size: number }) => (
+  <motion.div
+    className="absolute pointer-events-none select-none"
+    style={{ fontSize: size }}
+    initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
+    animate={{
+      opacity: [0, 1, 1, 0],
+      x: x,
+      y: y,
+      scale: [0, 1.3, 1, 0.6],
+      rotate: [0, Math.random() > 0.5 ? 180 : -180],
+    }}
+    transition={{ duration: 1.1, delay, ease: [0.22, 1, 0.36, 1] }}
+  />
+);
+
+const DotParticle = ({ delay, x, y, color, size }: { delay: number; x: number; y: number; color: string; size: number }) => (
   <motion.div
     className="absolute rounded-full pointer-events-none"
     style={{ backgroundColor: color, width: size, height: size }}
-    initial={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+    initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
     animate={{
-      opacity: [1, 1, 0],
+      opacity: [0, 1, 1, 0],
       x: x,
       y: y,
-      scale: [0, 1.2, 0.8],
-      rotate: [0, Math.random() * 360],
+      scale: [0, 1.5, 1, 0],
     }}
-    transition={{ duration: 0.8, delay, ease: "easeOut" }}
+    transition={{ duration: 0.9, delay, ease: [0.22, 1, 0.36, 1] }}
+  />
+);
+
+// Ring burst effect (like Lovable's expanding ring)
+const RingBurst = () => (
+  <motion.div
+    className="absolute rounded-full border-2 pointer-events-none"
+    style={{ borderColor: "hsl(22, 97%, 54%)" }}
+    initial={{ width: 0, height: 0, opacity: 0.8 }}
+    animate={{ width: 200, height: 200, opacity: 0 }}
+    transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
   />
 );
 
 const CONFETTI_COLORS = [
-  "hsl(22, 97%, 54%)",   // primary orange
-  "hsl(30, 90%, 50%)",   // warm orange
-  "hsl(45, 93%, 58%)",   // gold
-  "hsl(0, 0%, 100%)",    // white
-  "hsl(22, 97%, 70%)",   // light orange
-  "hsl(340, 82%, 52%)",  // pink
+  "hsl(22, 97%, 54%)",
+  "hsl(30, 90%, 50%)",
+  "hsl(45, 93%, 58%)",
+  "hsl(25, 60%, 40%)",
+  "hsl(22, 97%, 70%)",
+  "hsl(0, 0%, 100%)",
 ];
 
 const ConfettiBurst = ({ show }: { show: boolean }) => {
   if (!show) return null;
-  const particles = Array.from({ length: 24 }, (_, i) => {
-    const angle = (i / 24) * Math.PI * 2;
-    const distance = 60 + Math.random() * 80;
+
+  const emojis = Array.from({ length: 10 }, (_, i) => {
+    const angle = (i / 10) * Math.PI * 2;
+    const distance = 70 + Math.random() * 60;
     return {
-      id: i,
+      id: `e-${i}`,
       x: Math.cos(angle) * distance,
-      y: Math.sin(angle) * distance - 20,
-      delay: Math.random() * 0.15,
-      color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
-      size: 4 + Math.random() * 6,
+      y: Math.sin(angle) * distance - 30,
+      delay: 0.05 + Math.random() * 0.15,
+      emoji: CAFE_EMOJIS[i % CAFE_EMOJIS.length],
+      size: 18 + Math.random() * 10,
     };
   });
+
+  const dots = Array.from({ length: 16 }, (_, i) => {
+    const angle = (i / 16) * Math.PI * 2;
+    const distance = 40 + Math.random() * 100;
+    return {
+      id: `d-${i}`,
+      x: Math.cos(angle) * distance,
+      y: Math.sin(angle) * distance - 10,
+      delay: Math.random() * 0.12,
+      color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+      size: 3 + Math.random() * 5,
+    };
+  });
+
   return (
     <div className="absolute inset-0 flex items-center justify-center overflow-visible z-50 pointer-events-none">
-      {particles.map((p) => (
-        <Particle key={p.id} {...p} />
+      <RingBurst />
+      <motion.div
+        className="absolute rounded-full pointer-events-none"
+        style={{ backgroundColor: "hsl(22, 97%, 54%)" }}
+        initial={{ width: 0, height: 0, opacity: 0.3 }}
+        animate={{ width: 120, height: 120, opacity: 0 }}
+        transition={{ duration: 0.5, delay: 0.08, ease: "easeOut" }}
+      />
+      {emojis.map((p) => (
+        <EmojiParticle key={p.id} {...p} />
+      ))}
+      {dots.map((p) => (
+        <DotParticle key={p.id} {...p} />
       ))}
     </div>
   );
