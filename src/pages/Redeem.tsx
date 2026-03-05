@@ -302,6 +302,11 @@ const Redeem = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Footer */}
+      <p className="text-[11px] text-primary-foreground/60 mt-6 font-medium tracking-wide">
+        Powered by ZIP Solutions
+      </p>
     </div>
   );
 };
