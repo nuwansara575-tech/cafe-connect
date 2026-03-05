@@ -95,7 +95,7 @@ const Redeem = () => {
   return (
     <div className="min-h-screen gradient-cafe flex flex-col items-center justify-center px-4 py-10 font-[Inter] relative">
       {/* Logo */}
-      <img src={ccLogoWhite} alt="Cafe Connect" className="h-10 mb-6" />
+      <img src={ccLogoWhite} alt="Cafe Connect" className="h-14 mb-6" />
 
       <AnimatePresence mode="wait">
         {/* Loading */}
