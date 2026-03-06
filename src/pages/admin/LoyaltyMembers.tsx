@@ -49,6 +49,12 @@ export default function LoyaltyMembers() {
   const [enrollResults, setEnrollResults] = useState<{ id: string; name: string; mobile_number: string }[]>([]);
   const [enrolling, setEnrolling] = useState(false);
 
+  // New customer form
+  const [showNewForm, setShowNewForm] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newPhone, setNewPhone] = useState("");
+  const [creatingCustomer, setCreatingCustomer] = useState(false);
+
   const loadMembers = useCallback(async () => {
     setLoading(true);
     try {
@@ -125,9 +131,29 @@ export default function LoyaltyMembers() {
       setShowEnroll(false);
       setEnrollSearch("");
       setEnrollResults([]);
+      setShowNewForm(false);
       loadMembers();
     } catch { toast.error("Failed to enroll customer"); }
     setEnrolling(false);
+  };
+
+  const createAndEnroll = async () => {
+    if (!newName.trim() || !newPhone.trim()) { toast.error("Name and phone are required"); return; }
+    setCreatingCustomer(true);
+    try {
+      const { data: existing } = await supabase.from("customers").select("id").eq("mobile_number", newPhone.trim()).maybeSingle();
+      if (existing) {
+        const { data: alreadyEnrolled } = await supabase.from("loyalty_accounts").select("id").eq("customer_id", existing.id).maybeSingle();
+        if (alreadyEnrolled) { toast.error("This customer is already enrolled"); setCreatingCustomer(false); return; }
+        await enrollCustomer(existing.id);
+        setCreatingCustomer(false);
+        return;
+      }
+      const { data: newCust, error } = await supabase.from("customers").insert({ name: newName.trim(), mobile_number: newPhone.trim() }).select("id").single();
+      if (error || !newCust) { toast.error("Failed to create customer"); setCreatingCustomer(false); return; }
+      await enrollCustomer(newCust.id);
+    } catch { toast.error("Failed to create customer"); }
+    setCreatingCustomer(false);
   };
 
   const tierColor = (tier: string) => {
@@ -231,25 +257,45 @@ export default function LoyaltyMembers() {
       </Dialog>
 
       {/* Enroll Customer Dialog */}
-      <Dialog open={showEnroll} onOpenChange={setShowEnroll}>
+      <Dialog open={showEnroll} onOpenChange={v => { setShowEnroll(v); if (!v) { setShowNewForm(false); setNewName(""); setNewPhone(""); setEnrollSearch(""); setEnrollResults([]); } }}>
         <DialogContent>
           <DialogHeader><DialogTitle>Enroll Customer in Loyalty</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <div className="flex gap-2">
-              <Input placeholder="Search by name or phone..." value={enrollSearch} onChange={e => setEnrollSearch(e.target.value)} />
-              <Button onClick={searchCustomers}>Search</Button>
-            </div>
-            {enrollResults.length > 0 && (
-              <div className="border rounded-md divide-y max-h-48 overflow-y-auto">
-                {enrollResults.map(c => (
-                  <div key={c.id} className="flex items-center justify-between p-3">
-                    <div><p className="text-sm font-medium">{c.name}</p><p className="text-xs text-muted-foreground">{c.mobile_number}</p></div>
-                    <Button size="sm" onClick={() => enrollCustomer(c.id)} disabled={enrolling}>Enroll</Button>
+            {!showNewForm ? (
+              <>
+                <div className="flex gap-2">
+                  <Input placeholder="Search by name or phone..." value={enrollSearch} onChange={e => setEnrollSearch(e.target.value)} />
+                  <Button onClick={searchCustomers}>Search</Button>
+                </div>
+                {enrollResults.length > 0 && (
+                  <div className="border rounded-md divide-y max-h-48 overflow-y-auto">
+                    {enrollResults.map(c => (
+                      <div key={c.id} className="flex items-center justify-between p-3">
+                        <div><p className="text-sm font-medium">{c.name}</p><p className="text-xs text-muted-foreground">{c.mobile_number}</p></div>
+                        <Button size="sm" onClick={() => enrollCustomer(c.id)} disabled={enrolling}>Enroll</Button>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
+                {enrollResults.length === 0 && enrollSearch && <p className="text-sm text-muted-foreground text-center">No unenrolled customers found</p>}
+                <div className="border-t pt-3">
+                  <Button variant="outline" className="w-full" onClick={() => setShowNewForm(true)}>
+                    <Plus className="w-4 h-4 mr-1" /> Create New Customer & Enroll
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="space-y-3">
+                <Input placeholder="Customer name" value={newName} onChange={e => setNewName(e.target.value)} />
+                <Input placeholder="Mobile number" value={newPhone} onChange={e => setNewPhone(e.target.value)} />
+                <div className="flex gap-2">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowNewForm(false)}>Back</Button>
+                  <Button className="flex-1" onClick={createAndEnroll} disabled={creatingCustomer}>
+                    {creatingCustomer ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create & Enroll"}
+                  </Button>
+                </div>
               </div>
             )}
-            {enrollResults.length === 0 && enrollSearch && <p className="text-sm text-muted-foreground text-center">No unenrolled customers found</p>}
           </div>
         </DialogContent>
       </Dialog>
