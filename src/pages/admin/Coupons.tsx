@@ -36,19 +36,26 @@ export default function Coupons() {
   const [search, setSearch] = useState("");
   const baseUrl = window.location.origin;
 
-  const fetchCoupons = useCallback(async () => {
+  const fetchCoupons = useCallback(async (searchTerm?: string) => {
     setLoading(true);
     let query = supabase.from("coupons").select("*").order("created_at", { ascending: false }).limit(500);
     if (statusFilter !== "all") query = query.eq("status", statusFilter);
-    if (search.trim()) {
-      query = query.or(`token.ilike.%${search}%,coupon_code.ilike.%${search}%,customer_phone.ilike.%${search}%`);
+    const term = (searchTerm ?? search).trim();
+    if (term) {
+      query = query.or(`coupon_code.ilike.%${term}%,customer_phone.ilike.%${term}%,customer_name.ilike.%${term}%`);
     }
     const { data } = await query;
     setCoupons((data as Coupon[]) || []);
     setLoading(false);
   }, [statusFilter, search]);
 
-  useEffect(() => { fetchCoupons(); }, [fetchCoupons]);
+  useEffect(() => { fetchCoupons(); }, [statusFilter]);
+
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => { fetchCoupons(search); }, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const handleExpire = async (id: string) => {
     await supabase.from("coupons").update({ status: "expired" }).eq("id", id);
@@ -127,7 +134,7 @@ export default function Coupons() {
             <SelectItem value="expired">Expired</SelectItem>
           </SelectContent>
         </Select>
-        <Button variant="outline" size="icon" onClick={fetchCoupons}><RefreshCw className="w-4 h-4" /></Button>
+        <Button variant="outline" size="icon" onClick={() => fetchCoupons()}><RefreshCw className="w-4 h-4" /></Button>
       </div>
 
       {loading ? (

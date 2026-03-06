@@ -37,7 +37,7 @@ export default function LoyaltyRedeem() {
     setCustomer(null);
     setRedeemed(false);
     try {
-      const { data: custData } = await supabase.from("customers").select("id, name, mobile_number").eq("mobile_number", phone.trim()).maybeSingle();
+      const { data: custData } = await supabase.from("customers").select("id, name, mobile_number").ilike("mobile_number", `%${phone.trim()}%`).maybeSingle();
       if (!custData) { toast.error("Customer not found"); setSearching(false); return; }
 
       const { data: accData } = await supabase.from("loyalty_accounts").select("*").eq("customer_id", custData.id).maybeSingle();
