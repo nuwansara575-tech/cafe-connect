@@ -137,8 +137,7 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/admin">
               <Button
-                size="lg"
-                className="gradient-cafe text-primary-foreground shadow-cafe hover:shadow-cafe-lg transition-all px-8 h-13 text-base font-semibold rounded-full"
+                className="gradient-cafe text-primary-foreground shadow-cafe hover:shadow-cafe transition-all px-8 h-11 text-sm font-medium rounded-full"
               >
                 Get Started
                 <ArrowRight className="w-4 h-4 ml-2" />
