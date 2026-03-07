@@ -51,16 +51,16 @@ const Index = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
-          className="relative z-10 mb-10 w-full max-w-[340px] h-[160px]"
+          className="relative z-10 mb-10 flex flex-col items-center"
         >
-          {/* Card 3 — back */}
+          {/* Card 3 — back (smallest, most faded) */}
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
+            animate={{ opacity: 0.7, y: 0, scale: 0.95 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="absolute top-0 left-1/2 -translate-x-1/2 w-[280px]"
+            className="w-[280px] -mb-2"
           >
-            <div className="glass-subtle rounded-xl px-4 py-3 flex items-center gap-3 shadow-sm">
+            <div className="bg-card/60 backdrop-blur-md rounded-xl px-4 py-3 flex items-center gap-3 shadow-sm border border-border/30">
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                 <BarChart3 className="w-4 h-4 text-primary" />
               </div>
@@ -75,11 +75,11 @@ const Index = () => {
           {/* Card 2 — middle */}
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
+            animate={{ opacity: 0.85, y: 0, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="absolute top-[42px] left-1/2 -translate-x-[46%] w-[300px]"
+            className="w-[300px] -mb-2 z-10"
           >
-            <div className="glass-strong rounded-xl px-4 py-3 flex items-center gap-3 shadow-md">
+            <div className="bg-card/80 backdrop-blur-xl rounded-xl px-4 py-3 flex items-center gap-3 shadow-md border border-border/40">
               <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
                 <Shield className="w-4 h-4 text-primary" />
               </div>
@@ -91,14 +91,14 @@ const Index = () => {
             </div>
           </motion.div>
 
-          {/* Card 1 — front */}
+          {/* Card 1 — front (largest, full opacity) */}
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.8 }}
-            className="absolute top-[88px] left-1/2 -translate-x-[42%] w-[320px]"
+            className="w-[320px] z-20"
           >
-            <div className="glass-strong rounded-xl px-4 py-3.5 flex items-center gap-3 shadow-lg border border-border/60">
+            <div className="bg-card backdrop-blur-xl rounded-xl px-4 py-3.5 flex items-center gap-3 shadow-lg border border-border/60">
               <div className="w-8 h-8 rounded-lg gradient-cafe flex items-center justify-center shrink-0">
                 <QrCode className="w-4 h-4 text-primary-foreground" />
               </div>
@@ -106,7 +106,7 @@ const Index = () => {
                 <p className="text-sm font-semibold text-foreground leading-tight">Single-Use QR</p>
                 <p className="text-xs text-muted-foreground">Each code works only once</p>
               </div>
-              <span className="ml-auto text-[10px] text-muted-foreground/80 bg-primary/10 px-1.5 py-0.5 rounded text-primary font-medium">now</span>
+              <span className="ml-auto text-[10px] bg-primary/10 px-1.5 py-0.5 rounded text-primary font-medium">now</span>
             </div>
           </motion.div>
         </motion.div>
