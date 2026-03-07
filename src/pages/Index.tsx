@@ -3,32 +3,7 @@ import { Link } from "react-router-dom";
 import { QrCode, Shield, BarChart3, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const floatingCards = [
-  {
-    icon: QrCode,
-    title: "Single-Use QR",
-    desc: "Each code works only once",
-    delay: 0.6,
-    position: "bottom-[18%] left-[6%] md:left-[14%]",
-    rotate: "-2deg",
-  },
-  {
-    icon: Shield,
-    title: "Server Validated",
-    desc: "Verified server-side",
-    delay: 0.9,
-    position: "top-[18%] left-[25%] md:left-[28%]",
-    rotate: "1deg",
-  },
-  {
-    icon: BarChart3,
-    title: "Live Analytics",
-    desc: "Real-time tracking",
-    delay: 1.2,
-    position: "top-[42%] right-[4%] md:right-[10%]",
-    rotate: "-1deg",
-  },
-];
+const floatingCards = [];
 
 const Index = () => {
   return (
