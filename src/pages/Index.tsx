@@ -90,24 +90,24 @@ const Index = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
-          className="relative z-10 mb-12 w-[380px] h-[140px]"
+          className="relative z-10 mb-12 w-[460px] h-[180px]"
         >
           {/* Card 3 — back (Live Analytics) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="absolute top-0 left-0 w-[320px]"
+            className="absolute top-0 left-0 w-[380px]"
           >
-            <div className="bg-card/50 backdrop-blur-sm rounded-xl px-4 py-3 flex items-center gap-3 border border-border/20">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <BarChart3 className="w-4 h-4 text-primary" />
+            <div className="bg-card/40 rounded-2xl px-5 py-3.5 flex items-center gap-4 border border-border/15">
+              <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
+                <BarChart3 className="w-4.5 h-4.5 text-primary/60" />
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground leading-tight">Live Analytics</p>
-                <p className="text-xs text-muted-foreground">Real-time tracking</p>
+                <p className="text-[15px] font-medium text-foreground/70 leading-tight">Live Analytics</p>
+                <p className="text-xs text-muted-foreground/60">Real-time tracking</p>
               </div>
-              <span className="ml-auto text-[10px] text-muted-foreground">1m</span>
+              <span className="ml-auto text-[11px] text-muted-foreground/50">1m</span>
             </div>
           </motion.div>
 
@@ -116,17 +116,17 @@ const Index = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="absolute top-[36px] left-[20px] w-[340px]"
+            className="absolute top-[52px] left-[30px] w-[400px]"
           >
-            <div className="bg-card/80 backdrop-blur-md rounded-xl px-4 py-3 flex items-center gap-3 shadow-sm border border-border/30">
-              <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
-                <Shield className="w-4 h-4 text-primary" />
+            <div className="bg-card/85 backdrop-blur-md rounded-2xl px-5 py-3.5 flex items-center gap-4 shadow-sm border border-border/25">
+              <div className="w-9 h-9 rounded-xl bg-primary/12 flex items-center justify-center shrink-0">
+                <Shield className="w-4.5 h-4.5 text-primary/80" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground leading-tight">Server Validated</p>
-                <p className="text-xs text-muted-foreground">Verified server-side</p>
+                <p className="text-[15px] font-semibold text-foreground/85 leading-tight">Server Validated</p>
+                <p className="text-xs text-muted-foreground/70">Verified server-side</p>
               </div>
-              <span className="ml-auto text-[10px] text-muted-foreground">1m</span>
+              <span className="ml-auto text-[11px] text-muted-foreground/60">1m</span>
             </div>
           </motion.div>
 
@@ -135,17 +135,17 @@ const Index = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.8 }}
-            className="absolute top-[72px] left-[40px] w-[340px]"
+            className="absolute top-[104px] left-[60px] w-[400px]"
           >
-            <div className="bg-card backdrop-blur-xl rounded-xl px-4 py-3.5 flex items-center gap-3 shadow-lg border border-border/50">
-              <div className="w-8 h-8 rounded-lg gradient-cafe flex items-center justify-center shrink-0">
-                <QrCode className="w-4 h-4 text-primary-foreground" />
+            <div className="bg-card backdrop-blur-xl rounded-2xl px-5 py-4 flex items-center gap-4 shadow-lg border border-border/40">
+              <div className="w-9 h-9 rounded-xl gradient-cafe flex items-center justify-center shrink-0">
+                <QrCode className="w-4.5 h-4.5 text-primary-foreground" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground leading-tight">Single-Use QR</p>
+                <p className="text-[15px] font-semibold text-foreground leading-tight">Single-Use QR</p>
                 <p className="text-xs text-muted-foreground">Each code works only once</p>
               </div>
-              <span className="ml-auto text-[10px] bg-primary/10 px-1.5 py-0.5 rounded text-primary font-medium">now</span>
+              <span className="ml-auto text-[11px] bg-primary/10 px-2 py-0.5 rounded-md text-primary font-medium">now</span>
             </div>
           </motion.div>
         </motion.div>
