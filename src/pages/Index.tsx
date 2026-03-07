@@ -1,23 +1,65 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { QrCode, Shield, BarChart3, ArrowRight } from "lucide-react";
+import { QrCode, Shield, BarChart3, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const floatingCards = [
+  {
+    icon: QrCode,
+    title: "Single-Use QR",
+    desc: "Each code works only once",
+    delay: 0.6,
+    position: "top-[18%] left-[8%] md:left-[12%]",
+    rotate: "-3deg",
+  },
+  {
+    icon: Shield,
+    title: "Server Validated",
+    desc: "Verified server-side",
+    delay: 0.9,
+    position: "top-[10%] right-[8%] md:right-[12%]",
+    rotate: "2deg",
+  },
+  {
+    icon: BarChart3,
+    title: "Live Analytics",
+    desc: "Real-time tracking",
+    delay: 1.2,
+    position: "top-[32%] right-[4%] md:right-[18%]",
+    rotate: "-1deg",
+  },
+];
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
-      {/* Background — curved arc lines */}
+      {/* Background — soft radial rings inspired by reference */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1440 900" fill="none" preserveAspectRatio="xMidYMid slice">
-          <ellipse cx="720" cy="450" rx="600" ry="380" stroke="hsl(var(--border))" strokeWidth="1" fill="none" opacity="0.5" />
-          <ellipse cx="720" cy="450" rx="440" ry="280" stroke="hsl(var(--border))" strokeWidth="1" fill="none" opacity="0.4" />
-          <ellipse cx="720" cy="450" rx="280" ry="180" stroke="hsl(var(--border))" strokeWidth="1" fill="none" opacity="0.3" />
-          <line x1="720" y1="60" x2="720" y2="840" stroke="hsl(var(--border))" strokeWidth="0.5" opacity="0.2" />
-          <line x1="120" y1="450" x2="1320" y2="450" stroke="hsl(var(--border))" strokeWidth="0.5" opacity="0.2" />
-        </svg>
+        {/* Central ring glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full border border-primary/10" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] rounded-full border border-primary/8" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full border border-primary/6" />
 
-        {/* Soft ambient glow */}
-        <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/5 blur-[120px]" />
+        {/* Soft ambient blobs */}
+        <motion.div
+          animate={{ x: [0, 30, -20, 0], y: [0, -20, 15, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-[10%] right-[10%] w-[400px] h-[400px] rounded-full bg-primary/8 blur-[120px]"
+        />
+        <motion.div
+          animate={{ x: [0, -25, 20, 0], y: [0, 25, -15, 0] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-[10%] left-[10%] w-[350px] h-[350px] rounded-full bg-primary/5 blur-[100px]"
+        />
+
+        {/* Dot grid */}
+        <div
+          className="absolute inset-0 opacity-[0.025]"
+          style={{
+            backgroundImage: `radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)`,
+            backgroundSize: "32px 32px",
+          }}
+        />
       </div>
 
       {/* Header */}
@@ -40,78 +82,48 @@ const Index = () => {
 
       {/* Hero */}
       <main className="relative flex-1 flex flex-col items-center justify-center px-6 py-12 md:py-20">
-        {/* Stacked notification cards — centered above headline */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="relative z-10 mb-10 flex flex-col items-center"
-        >
-          {/* Card 3 — back (smallest, most faded) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 0.7, y: 0, scale: 0.95 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="w-[280px] -mb-2"
-          >
-            <div className="bg-card/60 backdrop-blur-md rounded-xl px-4 py-3 flex items-center gap-3 shadow-sm border border-border/30">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <BarChart3 className="w-4 h-4 text-primary" />
+        {/* Floating feature cards */}
+        <div className="absolute inset-0 hidden md:block pointer-events-none">
+          {floatingCards.map((card, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.6, delay: card.delay, ease: "easeOut" }}
+              className={`absolute ${card.position}`}
+              style={{ transform: `rotate(${card.rotate})` }}
+            >
+              <div className="glass-strong rounded-2xl px-5 py-4 flex items-center gap-3 shadow-cafe min-w-[200px]">
+                <div className="w-9 h-9 rounded-xl gradient-cafe flex items-center justify-center shrink-0">
+                  <card.icon className="w-4 h-4 text-primary-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground leading-tight">{card.title}</p>
+                  <p className="text-xs text-muted-foreground">{card.desc}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-foreground leading-tight">Live Analytics</p>
-                <p className="text-xs text-muted-foreground">Real-time tracking</p>
-              </div>
-              <span className="ml-auto text-[10px] text-muted-foreground">1m</span>
-            </div>
-          </motion.div>
-
-          {/* Card 2 — middle */}
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 0.85, y: 0, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            className="w-[300px] -mb-2 z-10"
-          >
-            <div className="bg-card/80 backdrop-blur-xl rounded-xl px-4 py-3 flex items-center gap-3 shadow-md border border-border/40">
-              <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
-                <Shield className="w-4 h-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground leading-tight">Server Validated</p>
-                <p className="text-xs text-muted-foreground">Verified server-side</p>
-              </div>
-              <span className="ml-auto text-[10px] text-muted-foreground">1m</span>
-            </div>
-          </motion.div>
-
-          {/* Card 1 — front (largest, full opacity) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.8 }}
-            className="w-[320px] z-20"
-          >
-            <div className="bg-card backdrop-blur-xl rounded-xl px-4 py-3.5 flex items-center gap-3 shadow-lg border border-border/60">
-              <div className="w-8 h-8 rounded-lg gradient-cafe flex items-center justify-center shrink-0">
-                <QrCode className="w-4 h-4 text-primary-foreground" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground leading-tight">Single-Use QR</p>
-                <p className="text-xs text-muted-foreground">Each code works only once</p>
-              </div>
-              <span className="ml-auto text-[10px] bg-primary/10 px-1.5 py-0.5 rounded text-primary font-medium">now</span>
-            </div>
-          </motion.div>
-        </motion.div>
+            </motion.div>
+          ))}
+        </div>
 
         {/* Center content */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.3 }}
+          transition={{ duration: 0.7 }}
           className="relative z-10 max-w-3xl text-center"
         >
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="glass-subtle inline-flex items-center gap-2 rounded-full px-5 py-2 mb-8"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs font-medium text-primary">Smart QR Coupon Platform</span>
+          </motion.div>
+
           <h1 className="text-5xl md:text-7xl font-display font-bold text-foreground mb-6 leading-[1.1] tracking-tight">
             Promote your café.{" "}
             <span className="text-gradient-cafe">Effortlessly.</span>
@@ -126,13 +138,33 @@ const Index = () => {
             <Link to="/admin">
               <Button
                 size="lg"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all px-8 h-12 text-sm font-medium rounded-full shadow-sm"
+                className="gradient-cafe text-primary-foreground shadow-cafe hover:shadow-cafe-lg transition-all px-8 h-13 text-base font-semibold rounded-full"
               >
                 Get Started
-                <ArrowRight className="w-4 h-4 ml-1.5" />
+                <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
           </div>
+        </motion.div>
+
+        {/* Mobile feature cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.4 }}
+          className="grid grid-cols-1 gap-4 mt-16 w-full max-w-sm md:hidden"
+        >
+          {floatingCards.map((card, i) => (
+            <div key={i} className="glass-strong rounded-2xl px-5 py-4 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl gradient-cafe flex items-center justify-center shrink-0">
+                <card.icon className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground leading-tight">{card.title}</p>
+                <p className="text-xs text-muted-foreground">{card.desc}</p>
+              </div>
+            </div>
+          ))}
         </motion.div>
       </main>
 
