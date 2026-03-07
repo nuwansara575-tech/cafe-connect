@@ -51,16 +51,16 @@ const Index = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
-          className="relative z-10 mb-10 flex flex-col items-center"
+          className="relative z-10 mb-10"
         >
           {/* Card 3 — back (smallest, most faded) */}
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 0.7, y: 0, scale: 0.95 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="w-[280px] -mb-2"
+            className="flex justify-center"
           >
-            <div className="bg-card/60 backdrop-blur-md rounded-xl px-4 py-3 flex items-center gap-3 shadow-sm border border-border/30">
+            <div className="w-[320px] bg-card/40 backdrop-blur-md rounded-xl px-4 py-3 flex items-center gap-3 shadow-sm border border-border/20">
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                 <BarChart3 className="w-4 h-4 text-primary" />
               </div>
@@ -77,9 +77,9 @@ const Index = () => {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 0.85, y: 0, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="w-[300px] -mb-2 z-10"
+            className="flex justify-center -mt-3"
           >
-            <div className="bg-card/80 backdrop-blur-xl rounded-xl px-4 py-3 flex items-center gap-3 shadow-md border border-border/40">
+            <div className="w-[360px] ml-8 bg-card/70 backdrop-blur-xl rounded-xl px-4 py-3 flex items-center gap-3 shadow-md border border-border/30">
               <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
                 <Shield className="w-4 h-4 text-primary" />
               </div>
@@ -96,9 +96,9 @@ const Index = () => {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.8 }}
-            className="w-[320px] z-20"
+            className="flex justify-center -mt-3"
           >
-            <div className="bg-card backdrop-blur-xl rounded-xl px-4 py-3.5 flex items-center gap-3 shadow-lg border border-border/60">
+            <div className="w-[400px] ml-16 bg-card backdrop-blur-xl rounded-xl px-4 py-3.5 flex items-center gap-3 shadow-lg border border-border/50">
               <div className="w-8 h-8 rounded-lg gradient-cafe flex items-center justify-center shrink-0">
                 <QrCode className="w-4 h-4 text-primary-foreground" />
               </div>
