@@ -352,10 +352,9 @@ const Redeem = () => {
         {/* Success - Coupon Claimed */}
         {state === "success" && (
           <motion.div key="success" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-            transition={cardTransition}
+           transition={cardTransition}
             className="bg-card rounded-3xl shadow-xl max-w-sm w-full overflow-hidden relative"
           >
-            <FullPageCelebration show={showConfetti} />
             <div className="flex flex-col items-center pt-6 pb-5 px-6">
               <motion.img
                 src={openBox}
