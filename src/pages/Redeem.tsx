@@ -171,8 +171,6 @@ const Redeem = () => {
   const [copied, setCopied] = useState(false);
   const [claimError, setClaimError] = useState("");
   const submitting = useRef(false);
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [buttonPressed, setButtonPressed] = useState(false);
 
   useEffect(() => {
     if (!token) { setState("invalid"); return; }
