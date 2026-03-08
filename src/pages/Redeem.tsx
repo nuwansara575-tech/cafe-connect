@@ -171,8 +171,6 @@ const Redeem = () => {
   const [copied, setCopied] = useState(false);
   const [claimError, setClaimError] = useState("");
   const submitting = useRef(false);
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [buttonPressed, setButtonPressed] = useState(false);
 
   useEffect(() => {
     if (!token) { setState("invalid"); return; }
@@ -216,9 +214,7 @@ const Redeem = () => {
         return;
       }
       setData((prev) => ({ ...prev, coupon_code: result.coupon_code }));
-      setShowConfetti(true);
       setState("success");
-      setTimeout(() => setShowConfetti(false), 2500);
     } catch {
       setClaimError("Something went wrong. Please try again.");
       setState("scanned");
@@ -320,10 +316,7 @@ const Redeem = () => {
 
               <motion.div className="relative">
                 <Button
-                  onClick={() => {
-                    setButtonPressed(true);
-                    handleClaim();
-                  }}
+                  onClick={handleClaim}
                   size="lg"
                   className="w-full gradient-cafe text-primary-foreground text-[16px] py-[14px] rounded-[14px] font-semibold h-auto shadow-cafe relative overflow-hidden group"
                   asChild={false}
@@ -338,7 +331,6 @@ const Redeem = () => {
                   {/* Shimmer sweep */}
                   <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
                 </Button>
-                <FullPageCelebration show={buttonPressed && showConfetti} />
               </motion.div>
               <p className="text-[11px] text-muted-foreground mt-3 text-center">
                 Your coupon code will be sent to your phone
@@ -360,10 +352,9 @@ const Redeem = () => {
         {/* Success - Coupon Claimed */}
         {state === "success" && (
           <motion.div key="success" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-            transition={cardTransition}
+           transition={cardTransition}
             className="bg-card rounded-3xl shadow-xl max-w-sm w-full overflow-hidden relative"
           >
-            <FullPageCelebration show={showConfetti} />
             <div className="flex flex-col items-center pt-6 pb-5 px-6">
               <motion.img
                 src={openBox}
