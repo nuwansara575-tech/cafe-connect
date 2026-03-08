@@ -330,6 +330,7 @@ const Redeem = () => {
                   </motion.span>
                   {/* Shimmer sweep */}
                   <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
+                </Button>
               </motion.div>
               <p className="text-[11px] text-muted-foreground mt-3 text-center">
                 Your coupon code will be sent to your phone
