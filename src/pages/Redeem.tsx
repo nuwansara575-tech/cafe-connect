@@ -316,10 +316,7 @@ const Redeem = () => {
 
               <motion.div className="relative">
                 <Button
-                  onClick={() => {
-                    setButtonPressed(true);
-                    handleClaim();
-                  }}
+                  onClick={handleClaim}
                   size="lg"
                   className="w-full gradient-cafe text-primary-foreground text-[16px] py-[14px] rounded-[14px] font-semibold h-auto shadow-cafe relative overflow-hidden group"
                   asChild={false}
