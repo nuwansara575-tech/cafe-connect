@@ -277,7 +277,7 @@ const Redeem = () => {
                 {data.discount_value?.includes("%") ? `${data.discount_value} OFF` : data.discount_value}
               </h2>
               <p className="text-[16px] font-semibold text-foreground mb-0.5">{data.offer_title}</p>
-              <p className="text-[13px] text-muted-foreground">{data.offer_description}</p>
+              <p className="text-[13px] text-muted-foreground text-center">{data.offer_description}</p>
             </div>
 
             {/* Divider */}
