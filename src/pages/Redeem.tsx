@@ -214,9 +214,7 @@ const Redeem = () => {
         return;
       }
       setData((prev) => ({ ...prev, coupon_code: result.coupon_code }));
-      setShowConfetti(true);
       setState("success");
-      setTimeout(() => setShowConfetti(false), 2500);
     } catch {
       setClaimError("Something went wrong. Please try again.");
       setState("scanned");
