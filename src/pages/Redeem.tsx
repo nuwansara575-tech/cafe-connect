@@ -179,8 +179,8 @@ const Redeem = () => {
 
   const validateToken = async (token: string) => {
     try {
-      const { data: result, error } = await supabase.functions.invoke("coupons/validate", {
-        body: { token },
+      const { data: result, error } = await invokeEdgeFunction("coupons/validate", {
+        token,
       });
       if (error || !result) { setState("invalid"); return; }
       setData(result);
