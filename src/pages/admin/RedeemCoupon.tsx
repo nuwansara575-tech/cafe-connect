@@ -56,8 +56,8 @@ export default function RedeemCoupon() {
     if (!coupon || redeeming) return;
     setRedeeming(true);
 
-    const { data, error: err } = await supabase.functions.invoke("coupons/redeem", {
-      body: { coupon_code: coupon.coupon_code },
+    const { data, error: err } = await invokeEdgeFunction("coupons/redeem", {
+      coupon_code: coupon.coupon_code,
     });
 
     setRedeeming(false);

@@ -48,15 +48,13 @@ export default function GenerateQR() {
     const finalDiscount = discountValue === "Custom" ? customDiscount : discountValue;
     if (!finalDiscount) { toast.error("Please enter a discount value"); setGenerating(false); return; }
 
-    const { data, error } = await supabase.functions.invoke("coupons/generate", {
-      body: {
-        count,
-        discount_value: finalDiscount,
-        campaign_name: campaignName,
-        offer_title: offerTitle || (finalDiscount.includes("%") ? `Get ${finalDiscount} OFF your order` : `Enjoy a ${finalDiscount}`),
-        offer_description: offerDescription,
-        campaign_id: campaignId && campaignId !== "none" ? campaignId : undefined,
-      },
+    const { data, error } = await invokeEdgeFunction("coupons/generate", {
+      count,
+      discount_value: finalDiscount,
+      campaign_name: campaignName,
+      offer_title: offerTitle || (finalDiscount.includes("%") ? `Get ${finalDiscount} OFF your order` : `Enjoy a ${finalDiscount}`),
+      offer_description: offerDescription,
+      campaign_id: campaignId && campaignId !== "none" ? campaignId : undefined,
     });
     setGenerating(false);
     if (error) { toast.error("Failed to generate coupons"); return; }

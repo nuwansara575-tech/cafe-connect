@@ -204,8 +204,8 @@ const Redeem = () => {
     submitting.current = true;
     setState("claiming");
     try {
-      const { data: result, error } = await supabase.functions.invoke("coupons/claim", {
-        body: { token, phone: phone.trim(), name: name.trim() || undefined },
+      const { data: result, error } = await invokeEdgeFunction("coupons/claim", {
+        token, phone: phone.trim(), name: name.trim() || undefined,
       });
       if (error || !result?.success) {
         setClaimError(result?.error || "Failed to claim coupon");
