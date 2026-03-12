@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { invokeEdgeFunction } from "@/lib/edge-functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -56,8 +57,8 @@ export default function RedeemCoupon() {
     if (!coupon || redeeming) return;
     setRedeeming(true);
 
-    const { data, error: err } = await supabase.functions.invoke("coupons/redeem", {
-      body: { coupon_code: coupon.coupon_code },
+    const { data, error: err } = await invokeEdgeFunction("coupons/redeem", {
+      coupon_code: coupon.coupon_code,
     });
 
     setRedeeming(false);

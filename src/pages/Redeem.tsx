@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { invokeEdgeFunction } from "@/lib/edge-functions";
 import { Copy, Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -179,8 +180,8 @@ const Redeem = () => {
 
   const validateToken = async (token: string) => {
     try {
-      const { data: result, error } = await supabase.functions.invoke("coupons/validate", {
-        body: { token },
+      const { data: result, error } = await invokeEdgeFunction("coupons/validate", {
+        token,
       });
       if (error || !result) { setState("invalid"); return; }
       setData(result);
@@ -204,8 +205,8 @@ const Redeem = () => {
     submitting.current = true;
     setState("claiming");
     try {
-      const { data: result, error } = await supabase.functions.invoke("coupons/claim", {
-        body: { token, phone: phone.trim(), name: name.trim() || undefined },
+      const { data: result, error } = await invokeEdgeFunction("coupons/claim", {
+        token, phone: phone.trim(), name: name.trim() || undefined,
       });
       if (error || !result?.success) {
         setClaimError(result?.error || "Failed to claim coupon");
