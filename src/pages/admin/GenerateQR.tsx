@@ -61,7 +61,7 @@ export default function GenerateQR() {
       toast.error(error.message || data?.error || "Failed to generate coupons");
       return;
     }
-  };
+    toast.success(`Generated ${data.count} coupons!`);
 
   return (
     <div className="max-w-lg mx-auto space-y-6">
