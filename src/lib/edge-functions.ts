@@ -1,46 +1,57 @@
-// Helper to call edge functions on the external Supabase project
-// This bypasses supabase.functions.invoke() which routes to Lovable Cloud
-
 import { supabase } from "@/integrations/supabase/client";
 
-const EXTERNAL_SUPABASE_URL = "https://kiodbjklpyphaqhvijai.supabase.co";
-const EXTERNAL_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtpb2RiamtscHlwaGFxaHZpamFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTA4OTksImV4cCI6MjA4ODg2Njg5OX0.SM95O5xq_pGrw-drk64rj0Cjh9KCq40PKwDxXxhYuXk";
+const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL ?? "").trim();
+const SUPABASE_ANON_KEY = (
+  import.meta.env.VITE_SUPABASE_ANON_KEY ??
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+  ""
+).trim();
 
 export async function invokeEdgeFunction(
   functionPath: string,
   body: Record<string, unknown>
 ): Promise<{ data: any; error: Error | null }> {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    return {
+      data: null,
+      error: new Error("Missing backend URL or anon key configuration"),
+    };
+  }
+
   try {
-    // Get current session token for auth
     const { data: sessionData } = await supabase.auth.getSession();
     const accessToken = sessionData?.session?.access_token;
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      "apikey": EXTERNAL_ANON_KEY,
-    };
-
-    if (accessToken) {
-      headers["Authorization"] = `Bearer ${accessToken}`;
-    }
+    const authorization = accessToken ? `Bearer ${accessToken}` : `Bearer ${SUPABASE_ANON_KEY}`;
 
     const res = await fetch(
-      `${EXTERNAL_SUPABASE_URL}/functions/v1/${functionPath}`,
+      `${SUPABASE_URL}/functions/v1/${functionPath.replace(/^\/+/, "")}`,
       {
         method: "POST",
-        headers,
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: authorization,
+        },
         body: JSON.stringify(body),
       }
     );
 
-    const data = await res.json();
+    const contentType = res.headers.get("content-type") ?? "";
+    const payload = contentType.includes("application/json")
+      ? await res.json()
+      : await res.text();
 
     if (!res.ok) {
-      return { data, error: new Error(data.error || `HTTP ${res.status}`) };
+      const message =
+        typeof payload === "object" && payload && "error" in payload
+          ? String((payload as { error?: string }).error)
+          : `HTTP ${res.status}`;
+      return { data: payload, error: new Error(message) };
     }
 
-    return { data, error: null };
+    return { data: payload, error: null };
   } catch (err) {
     return { data: null, error: err as Error };
   }
 }
+

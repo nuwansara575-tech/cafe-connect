@@ -57,7 +57,10 @@ export default function GenerateQR() {
       campaign_id: campaignId && campaignId !== "none" ? campaignId : undefined,
     });
     setGenerating(false);
-    if (error) { toast.error("Failed to generate coupons"); return; }
+    if (error) {
+      toast.error(error.message || data?.error || "Failed to generate coupons");
+      return;
+    }
     toast.success(`Generated ${data.count} coupons!`);
   };
 
