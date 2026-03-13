@@ -135,34 +135,6 @@ serve(async (req) => {
         return jsonResponse({ error: "Failed to claim coupon" }, 500);
       }
 
-      // Send SMS with coupon code to customer
-      try {
-        const TEXTLK_API_TOKEN = Deno.env.get("TEXTLK_API_TOKEN");
-        const TEXTLK_SENDER_ID = Deno.env.get("TEXTLK_SENDER_ID");
-        if (TEXTLK_API_TOKEN && TEXTLK_SENDER_ID) {
-          let smsPhone = phone.trim().replace(/\s+/g, "").replace(/^0/, "94");
-          if (!smsPhone.startsWith("+")) smsPhone = "+" + smsPhone;
-
-          const smsMessage = `Hi${name ? " " + name.trim() : ""}! Your Cafe Connect coupon code is: ${updated.coupon_code}. ${updated.offer_title} (${updated.discount_value}). Show this code at checkout to redeem. Enjoy!`;
-
-          await fetch("https://app.text.lk/api/v3/sms/send", {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${TEXTLK_API_TOKEN}`,
-              "Content-Type": "application/json",
-              "Accept": "application/json",
-            },
-            body: JSON.stringify({
-              recipient: smsPhone,
-              sender_id: TEXTLK_SENDER_ID,
-              message: smsMessage,
-            }),
-          });
-        }
-      } catch (smsErr) {
-        console.error("SMS send failed (non-blocking):", smsErr);
-      }
-
       return jsonResponse({
         success: true,
         status: "claimed",
