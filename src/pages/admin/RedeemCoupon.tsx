@@ -64,7 +64,7 @@ export default function RedeemCoupon() {
     setRedeeming(false);
 
     if (err || !data?.success) {
-      toast.error(data?.error || "Failed to redeem coupon");
+      toast.error(data?.error || err?.message || "Failed to redeem coupon");
       return;
     }
 
