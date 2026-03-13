@@ -62,6 +62,7 @@ export default function GenerateQR() {
       return;
     }
     toast.success(`Generated ${data.count} coupons!`);
+  };
 
   return (
     <div className="max-w-lg mx-auto space-y-6">
